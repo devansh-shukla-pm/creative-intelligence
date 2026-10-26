@@ -22,7 +22,7 @@ cd app && python3 -m http.server 8934     # http://localhost:8934/creative-intel
 
 No build step and no install. Fonts load from Google Fonts and the "View" links open ad creatives hosted on S3, so those need internet.
 
-Ad thumbnails are not stored in this repo (they are client creatives). Without the `thumbs/`, `cre-thumbs/`, `cmt-thumbs/`, `shesha-thumbs/` folders next to the HTML, thumbnail images show as empty. Everything else works.
+Ad thumbnails are included in `app/` (`thumbs/`, `cre-thumbs/`, `cmt-thumbs/`, `shesha-thumbs/`, `shesha-sprite-1.jpg`). They must stay next to the HTML file.
 
 Dark and light themes are built in (toggle at top right). The light theme follows the warm design-system tokens.
 
@@ -41,7 +41,8 @@ Four backend signals decide what unlocks and when (A: Meta data, B: classificati
 ## Repository layout
 
 ```
-app/                         The product: creative-intelligence.html (all three tabs, data embedded)
+app/                         The product: creative-intelligence.html (all three tabs, data embedded) and its thumbnail folders
+source-data/                 Shesha Full Creatives Analysis.csv, the raw export the embedded data came from
 prompts/                     Every prompt used
     extraction_prompt.md         Step 1: classify each ad (fixed fields + free text)
     clustering_prompt.md         Step 2: group free text into angles, with cluster memory
@@ -89,7 +90,7 @@ For one product, the Lab scores every supported combination of angles (one per s
 
 ```bash
 python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
-mkdir -p source-data   # put 'Shesha Full Creatives Analysis.csv' here, or set CI_SOURCE_CSV
+# reads source-data/Shesha Full Creatives Analysis.csv (or set CI_SOURCE_CSV)
 cd experimentation-lab
 python3 final_recipes.py      # fits on all data, writes final_results.json
 python3 export_steps.py       # writes steps_data.json

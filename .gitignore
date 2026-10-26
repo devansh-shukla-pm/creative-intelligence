@@ -5,10 +5,3 @@ venv/
 __pycache__/
 *.pyc
 .env
-# raw client exports and creative images are not stored in this repo
-source-data/
-thumbs/
-cre-thumbs/
-cmt-thumbs/
-shesha-thumbs/
-shesha-sprite-*.jpg
