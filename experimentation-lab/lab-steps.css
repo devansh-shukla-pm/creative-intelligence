@@ -1,0 +1,87 @@
+
+/* ===== Experimentation Lab: six-step flow ===== */
+.xl{display:flex;flex-direction:column;gap:var(--sp-6);max-width:1120px}
+.xl-kicker{font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--color-text-accent);text-transform:uppercase}
+.xl h1{margin:4px 0 0;font-size:26px;font-weight:700;letter-spacing:-.3px;color:var(--color-text-heading)}
+.xl-lede{margin:8px 0 0;max-width:680px;font-size:13.5px;line-height:1.6;color:var(--color-text-muted)}
+.xl-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.xl-chip{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:var(--radius-pill);border:1px solid var(--color-border-default);background:var(--color-surface-chip);font-size:12.5px;font-weight:600;color:var(--color-text-secondary)}
+.xl-chip small{font:500 11px var(--font-mono);color:var(--color-text-subtle)}
+.xl-chip:hover{border-color:var(--color-border-strong);color:var(--color-text-heading)}
+.xl-chip.on{background:var(--gradient-primary);border-color:transparent;color:#fff}.xl-chip.on small{color:rgba(255,255,255,.8)}
+.xl-chip.off{opacity:.5;cursor:default}
+.xl-preview{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;border:1px solid var(--color-border-default);background:var(--color-surface-card);border-radius:var(--radius-xl);padding:14px 18px}
+.xl-preview b.big{font:700 26px var(--font-mono);color:var(--color-text-heading);letter-spacing:-.4px}
+.xl-preview span{font-size:12.5px;color:var(--color-text-muted)}
+.xl-preview a{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--color-text-accent);cursor:pointer}
+.xl-audit{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px 24px;border:1px solid var(--color-border-default);background:var(--color-surface-card);border-radius:var(--radius-xl);padding:18px 20px}
+.xl-audit div b{display:block;font:700 20px var(--font-mono);color:var(--color-text-heading)}
+.xl-audit div span{font-size:11.5px;color:var(--color-text-subtle)}
+.xl-step{display:flex;flex-direction:column;gap:14px;border:1px solid var(--color-border-default);background:var(--color-surface-card);border-radius:var(--radius-xl);padding:22px 24px}
+.xl-sh{display:flex;align-items:center;gap:12px}
+.xl-sn{font:700 11px var(--font-mono);letter-spacing:.4px;color:var(--color-text-accent);background:var(--color-accent-soft);border:1px solid var(--color-border-purple);border-radius:var(--radius-pill);padding:3px 11px;white-space:nowrap}
+.xl-sh h2{margin:0;font-size:17px;font-weight:700;color:var(--color-text-heading);letter-spacing:-.15px}
+.xl-what{margin:0;max-width:760px;font-size:13px;line-height:1.65;color:var(--color-text-muted)}
+.xl-what b{color:var(--color-text-secondary);font-weight:600}
+.xl-decide{display:flex;gap:12px;align-items:flex-start;border-radius:var(--radius-lg);padding:12px 16px;background:var(--color-accent-soft);border:1px solid var(--color-border-purple);font-size:12.5px;line-height:1.6;color:var(--color-text-secondary)}
+.xl-decide i{flex:none;font-style:normal;font:700 10px var(--font-primary);letter-spacing:.6px;text-transform:uppercase;color:var(--color-text-accent);padding-top:3px}
+.xl-decide b{color:var(--color-text-heading)}
+.xl-cols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media(max-width:1000px){.xl-cols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.xl-cols{grid-template-columns:1fr}}
+.xl-col{border:1px solid var(--color-border-default);background:var(--color-surface-card-deep);border-radius:var(--radius-lg);padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.xl-col h4{margin:2px 2px 4px;font:700 10px var(--font-primary);letter-spacing:.6px;text-transform:uppercase;color:var(--color-text-subtle)}
+.xl-ang{border:1px solid transparent;border-radius:var(--radius-md);padding:8px 9px;background:var(--color-surface-chip);font-size:12px;color:var(--color-text-secondary);line-height:1.35}
+.xl-ang.pick{border-color:var(--color-border-purple);background:var(--color-accent-soft);color:var(--color-text-heading)}
+.xl-ang b{display:block;font-weight:600;overflow-wrap:anywhere}
+.xl-ang em{display:block;margin-top:3px;font:500 10.5px var(--font-mono);font-style:normal;color:var(--color-text-subtle)}
+.xl-ang .tg{display:inline-block;margin-bottom:4px;font:700 9px var(--font-primary);letter-spacing:.5px;text-transform:uppercase;color:var(--color-text-accent)}
+.xl-tier{display:inline-block;margin-left:6px;font:600 9.5px var(--font-primary);letter-spacing:.3px;border-radius:var(--radius-pill);padding:1px 7px;background:var(--color-surface-card);color:var(--color-text-subtle)}
+.xl-tier.Strong,.xl-tier.Solid{color:var(--color-status-success)}.xl-tier.Some{color:var(--color-status-warning)}.xl-tier.Thin{color:var(--color-status-error)}
+.xl-more{font-size:11px;color:var(--color-text-faint);padding:2px 4px}
+.xl-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.xl-tbl th{text-align:left;font:600 10.5px var(--font-primary);letter-spacing:.5px;text-transform:uppercase;color:var(--color-text-subtle);padding:8px 10px;border-bottom:1px solid var(--color-border-default);white-space:nowrap}
+.xl-tbl td{padding:10px;border-bottom:1px solid var(--color-border-subtle);color:var(--color-text-secondary);vertical-align:top}
+.xl-tbl .num,.xl-tbl th.num{text-align:right;font-family:var(--font-mono);white-space:nowrap}
+.xl-tbl .pos{color:var(--color-status-success)}.xl-tbl .neg{color:var(--color-status-error)}.xl-tbl .mut{color:var(--color-text-faint)}
+.xl-tbl td b{color:var(--color-text-heading);font-weight:600}
+.xl-tbl td small{display:block;margin-top:2px;font-size:11px;color:var(--color-text-subtle)}
+.xl-wrap{overflow-x:auto}
+.xl-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-5)}
+@media(max-width:900px){.xl-two{grid-template-columns:1fr}}
+.xl-h5{margin:0 0 6px;font:700 11px var(--font-primary);letter-spacing:.6px;text-transform:uppercase;color:var(--color-text-subtle)}
+.xl-bar{height:6px;border-radius:4px;background:var(--color-surface-chip);overflow:hidden;min-width:70px}.xl-bar i{display:block;height:100%;background:var(--gradient-primary)}
+.xl-flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.xl-flow .bx{border:1px solid var(--color-border-default);background:var(--color-surface-card-deep);border-radius:var(--radius-lg);padding:12px 16px}
+.xl-flow .bx span{display:block;font-size:11px;color:var(--color-text-subtle)}.xl-flow .bx b{font:700 22px var(--font-mono);color:var(--color-text-heading)}
+.xl-flow .ar{color:var(--color-text-faint);font-size:18px}
+.xl-ad{display:flex;align-items:center;gap:12px;justify-content:space-between;border:1px solid var(--color-border-default);background:var(--color-surface-card-deep);border-radius:var(--radius-md);padding:9px 12px;font-size:12px;color:var(--color-text-secondary)}
+.xl-ad a{color:var(--color-text-accent);font-weight:600}
+.xl-ads{display:flex;flex-direction:column;gap:6px}
+/* step 6 */
+.xl-final{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:var(--sp-5);align-items:stretch}
+@media(max-width:900px){.xl-final{grid-template-columns:1fr}}
+.xl-hero{border-radius:var(--radius-xl);padding:24px;background:linear-gradient(160deg,var(--color-accent-soft),transparent 70%),var(--color-surface-card-deep);border:1px solid var(--color-border-purple);display:flex;flex-direction:column;gap:6px}
+.xl-hero .lab{font:700 11px var(--font-primary);letter-spacing:.6px;text-transform:uppercase;color:var(--color-text-accent)}
+.xl-hero .val{font:800 54px/1.05 var(--font-mono);letter-spacing:-1.5px;color:var(--color-text-heading)}
+.xl-hero .rng{font-size:13px;color:var(--color-text-muted)}.xl-hero .rng b{font-family:var(--font-mono);color:var(--color-text-secondary)}
+.xl-rec{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.xl-rec div{display:flex;gap:10px;justify-content:space-between;font-size:12.5px;padding:7px 0;border-top:1px solid var(--color-border-default)}
+.xl-rec span{color:var(--color-text-subtle);font:600 10px var(--font-primary);letter-spacing:.5px;text-transform:uppercase;padding-top:2px;flex:none}
+.xl-rec b{text-align:right;color:var(--color-text-heading);font-weight:600}
+.xl-cmp{display:flex;flex-direction:column;gap:12px}
+.xl-cmp .r{display:grid;grid-template-columns:150px minmax(0,1fr) 54px;gap:12px;align-items:center;font-size:12px;color:var(--color-text-secondary)}
+.xl-cmp .r .t{height:10px;border-radius:6px;background:var(--color-surface-chip);position:relative;overflow:hidden}.xl-cmp .r .t i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--color-text-faint)}
+.xl-cmp .r.me .t i{background:var(--gradient-primary)}.xl-cmp .r.bad .t i{background:var(--color-status-error);opacity:.6}
+.xl-cmp .r b{font:700 12px var(--font-mono);text-align:right;color:var(--color-text-heading)}
+.xl-chk{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.xl-chk li{display:flex;gap:11px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--color-text-secondary)}
+.xl-chk li i{flex:none;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:700 11px var(--font-primary);font-style:normal;margin-top:1px}
+.xl-chk li.ok i{background:rgba(62,207,142,.16);color:var(--color-status-success)}.xl-chk li.warn i{background:rgba(232,165,61,.16);color:var(--color-status-warning)}
+.xl-chk li b{color:var(--color-text-heading);font-weight:600}
+.xl-verdict{border-radius:var(--radius-lg);padding:14px 16px;font-size:13px;line-height:1.6;color:var(--color-text-secondary);border:1px solid var(--color-border-default);background:var(--color-surface-card-deep)}
+.xl-verdict b{color:var(--color-text-heading)}
+.xl-foot{font-size:11.5px;line-height:1.6;color:var(--color-text-subtle);max-width:820px}
+.xl-empty{border:1px dashed var(--color-border-strong);border-radius:var(--radius-xl);padding:26px;font-size:13px;line-height:1.7;color:var(--color-text-muted)}
+.xl-empty b{color:var(--color-text-heading)}
+:root[data-theme="light"] .xl-chip.on small{color:rgba(255,255,255,.85)}

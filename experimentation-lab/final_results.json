@@ -1,0 +1,346 @@
+{
+ "meta": {
+  "slope": 0.11,
+  "resid_sd": 0.14331310507551487,
+  "n_ads": 251,
+  "minn": 2
+ },
+ "products": [
+  {
+   "id": "night-repair-cream",
+   "name": "Night Repair Cream",
+   "ads": 70,
+   "baseline": 2.780618904228916,
+   "grid": 3600,
+   "recipe": [
+    {
+     "stage": "problem-statement",
+     "angle": "Product safety/authenticity concern",
+     "n": 5,
+     "spend": 245610.50999999998,
+     "roas": 2.8947912693149815,
+     "modal": "Skin dullness & pigmentation"
+    },
+    {
+     "stage": "hook-line",
+     "angle": "Authenticity of Ayurveda",
+     "n": 3,
+     "spend": 164921.43,
+     "roas": 3.036356706341923,
+     "modal": "Skin problem narrative"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "angle": "Authentic Ayurvedic formulation",
+     "n": 24,
+     "spend": 1871202.12,
+     "roas": 2.801127507273239,
+     "modal": "Authentic Ayurvedic formulation"
+    },
+    {
+     "stage": "use-case-scenario",
+     "angle": "Nighttime skincare & repair",
+     "n": 62,
+     "spend": 3322290.4699999997,
+     "roas": 2.7775371910813087,
+     "modal": "Nighttime skincare & repair"
+    },
+    {
+     "stage": "cta-text",
+     "angle": "Follow for more",
+     "n": 2,
+     "spend": 146142.65,
+     "roas": 2.7372700577141584,
+     "modal": "Comment for link/info"
+    }
+   ],
+   "pred_recipe": 3.129787979850372,
+   "pred_modal": 2.624195411081071,
+   "raw_inc": 0.19266574685496285,
+   "cal_inc": 0.0,
+   "lo": 2.4376403613800575,
+   "hi": 3.9612952390603597,
+   "alts": [
+    {
+     "recipe": [
+      "Product safety/authenticity concern",
+      "Authenticity of Ayurveda",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.129787979850372
+    },
+    {
+     "recipe": [
+      "Product texture/staining concern",
+      "Product/brand endorsement",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.1181473794444234
+    },
+    {
+     "recipe": [
+      "Product texture/staining concern",
+      "Authenticity of Ayurveda",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.113693685117836
+    },
+    {
+     "recipe": [
+      "Product safety/authenticity concern",
+      "Authenticity of Ayurveda",
+      "Authentic Ayurvedic formulation",
+      "Daily skincare & wellness",
+      "Follow for more"
+     ],
+     "pred": 3.1095798476638667
+    },
+    {
+     "recipe": [
+      "Product safety/authenticity concern",
+      "Product/brand endorsement",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.107818350052664
+    }
+   ],
+   "full_runs": 0,
+   "slope": 0.0,
+   "slope_raw": 0.01,
+   "slope_lo": -0.33,
+   "slope_hi": 0.68
+  },
+  {
+   "id": "hair-colour-dye",
+   "name": "Hair Colour / Hair Dye",
+   "ads": 49,
+   "baseline": 2.4616148935196436,
+   "grid": 36,
+   "recipe": [
+    {
+     "stage": "problem-statement",
+     "angle": "Grey hair & dye damage",
+     "n": 42,
+     "spend": 1475921.62,
+     "roas": 2.478969953702555,
+     "modal": "Grey hair & dye damage"
+    },
+    {
+     "stage": "hook-line",
+     "angle": "Personal product review opener",
+     "n": 3,
+     "spend": 211669.61,
+     "roas": 2.9130470358971228,
+     "modal": "Direct grey hair problem"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "angle": "No harsh chemicals in hair dye",
+     "n": 45,
+     "spend": 1752864.1100000003,
+     "roas": 2.4799460352919196,
+     "modal": "No harsh chemicals in hair dye"
+    },
+    {
+     "stage": "use-case-scenario",
+     "angle": "Grey hair coverage",
+     "n": 43,
+     "spend": 1501602.6500000004,
+     "roas": 2.430873946579675,
+     "modal": "Grey hair coverage"
+    },
+    {
+     "stage": "cta-text",
+     "angle": "Comment for link/info",
+     "n": 21,
+     "spend": 767270.94,
+     "roas": 2.530787416502442,
+     "modal": "Comment for link/info"
+    }
+   ],
+   "pred_recipe": 2.580355703474813,
+   "pred_modal": 2.4973740956126687,
+   "raw_inc": 0.033227544086376515,
+   "cal_inc": 0.0,
+   "lo": 1.9802922896802664,
+   "hi": 3.301238173112166,
+   "alts": [
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Personal product review opener",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Comment for link/info"
+     ],
+     "pred": 2.580355703474813
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Personal product review opener",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Direct product trial"
+     ],
+     "pred": 2.555899906642731
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Personal product review opener",
+      "High-level endorsement",
+      "Grey hair coverage",
+      "Direct product trial"
+     ],
+     "pred": 2.5159507085077277
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Direct product trial"
+     ],
+     "pred": 2.5055517804403165
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Comment for link/info"
+     ],
+     "pred": 2.4973740956126687
+    }
+   ],
+   "full_runs": 3,
+   "slope": 0.0,
+   "slope_raw": -0.57,
+   "slope_lo": -1.09,
+   "slope_hi": -0.13
+  },
+  {
+   "id": "root-touch-up-powder",
+   "name": "Root Touch Up Powder",
+   "ads": 19,
+   "baseline": 2.4479198516747216,
+   "grid": 24,
+   "recipe": [
+    {
+     "stage": "problem-statement",
+     "angle": "Grey hair & dye damage",
+     "n": 19,
+     "spend": 611752.77,
+     "roas": 2.4479198516747216,
+     "modal": "Grey hair & dye damage"
+    },
+    {
+     "stage": "hook-line",
+     "angle": "Direct grey hair problem",
+     "n": 11,
+     "spend": 65131.63,
+     "roas": 3.1450986256600673,
+     "modal": "Direct grey hair problem"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "angle": "Quick & easy grey coverage",
+     "n": 19,
+     "spend": 611752.77,
+     "roas": 2.4479198516747216,
+     "modal": "Quick & easy grey coverage"
+    },
+    {
+     "stage": "use-case-scenario",
+     "angle": "Emergency/event prep",
+     "n": 8,
+     "spend": 216538.34000000003,
+     "roas": 2.7398342021094275,
+     "modal": "Emergency/event prep"
+    },
+    {
+     "stage": "cta-text",
+     "angle": "Shop online/now",
+     "n": 5,
+     "spend": 24241.35,
+     "roas": 3.49434499316251,
+     "modal": "Comment for link/info"
+    }
+   ],
+   "pred_recipe": 2.717002272125166,
+   "pred_modal": 2.689643153368155,
+   "raw_inc": 0.010172025505595483,
+   "cal_inc": 0.0,
+   "lo": 2.0940370538009567,
+   "hi": 3.465397682943345,
+   "alts": [
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Shop online/now"
+     ],
+     "pred": 2.717002272125166
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Product introduction",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Shop online/now"
+     ],
+     "pred": 2.69887248907076
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Comment for link/info"
+     ],
+     "pred": 2.689643153368154
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Product introduction",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Comment for link/info"
+     ],
+     "pred": 2.6727698151285724
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Skin problem narrative",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Comment for link/info"
+     ],
+     "pred": 2.652880167340985
+    }
+   ],
+   "full_runs": 3,
+   "slope": 0.0,
+   "slope_raw": 0.77,
+   "slope_lo": -0.49,
+   "slope_hi": 1.2
+  }
+ ]
+}

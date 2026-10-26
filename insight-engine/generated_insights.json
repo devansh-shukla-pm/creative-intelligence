@@ -1,0 +1,129 @@
+{
+  "insights": [
+    {
+      "source_type": "do",
+      "candidate_id": "do_1",
+      "headline": "Ads opening with a transformation story earn more than average, yet get little budget.",
+      "body": "These 9 ads bring back <b>₹3.35</b> for every ₹1 spent, against ₹2.66 for your account overall. They get only 1% of your budget.",
+      "action": "Make 3 more ads that open with a personal transformation story, then move more budget behind them.",
+      "ad_ids": [
+        "120249177560540425",
+        "120245034094810425",
+        "120246720526380425",
+        "120241813144480425",
+        "120249489143210425",
+        "120245627503080425",
+        "120248145679970425",
+        "120245627741150425",
+        "120245377309560425"
+      ],
+      "link_label": "Opening hook: personal transformation claim",
+      "tag": "Opportunity",
+      "evidence": {
+        "n_ads": 9,
+        "spend": 97791,
+        "roas": 3.348,
+        "spend_share_pct": 1.04,
+        "widened": false
+      }
+    },
+    {
+      "source_type": "funnel_leak",
+      "candidate_id": "funnel_leak_2",
+      "headline": "Ads opening with proof of results get clicks, but fewer add to cart.",
+      "body": "These 7 ads get 10% more people clicking through than average, but 19% fewer add to cart. So <b>₹5.4L</b> of your budget sits on ads that lose more people before the cart than average.",
+      "action": "Test a clearer product page for these 7 ads, one that shows the benefit and price sooner, and keep the opening.",
+      "ad_ids": [
+        "120247361748360425",
+        "120249092542540425",
+        "120247758944790425",
+        "120241834139830425",
+        "120247893111670425",
+        "120248619233890425",
+        "120249959075110425"
+      ],
+      "link_label": "Opening hook: proof of results",
+      "tag": "Leaking sales",
+      "evidence": {
+        "n_ads": 7,
+        "spend": 535015,
+        "roas": 2.226,
+        "lpv_ratio": 1.099,
+        "atc_ratio": 0.81,
+        "conv_ratio": 0.69
+      }
+    },
+    {
+      "source_type": "product_split",
+      "candidate_id": "product_split_3",
+      "headline": "Grey-hair ads earn more on root touch-up powder, but hair colour gets the budget.",
+      "body": "On root touch-up powder, grey-hair ads bring back <b>₹3.14</b> for every ₹1 spent, but only ₹2.41 on hair colour. Hair colour gets about 6 times the budget, ₹4.1L against ₹65,141.",
+      "action": "Make more grey-hair ads for root touch-up powder, then move some hair colour budget to them.",
+      "ad_ids": [
+        "120249988298040425",
+        "120248441374130425",
+        "120244024570570425",
+        "120249093162220425",
+        "120248440792640425",
+        "120250058093500425",
+        "120246004793270425",
+        "120250058093800425",
+        "120249092835920425",
+        "120248440509950425",
+        "120248441146520425",
+        "120245576949050425",
+        "120249988264930425",
+        "120248641048830425",
+        "120249489143200425",
+        "120249988168910425",
+        "120248641048840425",
+        "120248380311320425",
+        "120249988184620425",
+        "120245376963580425",
+        "120245377033560425",
+        "120248228338530425",
+        "120246720551130425",
+        "120248641153200425",
+        "120249770470640425",
+        "120249903218340425",
+        "120245291494270425",
+        "120245291880410425",
+        "120246682317690425"
+      ],
+      "link_label": "Opening hook: direct grey hair problem, root touch-up powder and hair colour",
+      "tag": "Budget mismatch",
+      "evidence": {
+        "hi_roas": 3.145,
+        "lo_roas": 2.407,
+        "hi_spend": 65141,
+        "lo_spend": 409013,
+        "hi_n": 12,
+        "lo_n": 17
+      }
+    },
+    {
+      "source_type": "chemistry",
+      "candidate_id": "chemistry_4",
+      "headline": "Night-time skincare ads with Shark Tank proof earn more than either idea alone.",
+      "body": "These 5 ads bring back <b>₹3.88</b> for every ₹1 spent, against ₹2.76 and ₹2.51 for each idea alone. So together they beat the stronger idea on its own by 41%.",
+      "action": "Make 3 more night-time skincare ads that also show the Shark Tank or TV endorsement.",
+      "ad_ids": [
+        "120248619233880425",
+        "120248619217890425",
+        "120247361345680425",
+        "120248619394700425",
+        "120248145679980425"
+      ],
+      "link_label": "Pairing: night-time skincare use-case with Shark Tank / TV proof",
+      "tag": "Works better together",
+      "evidence": {
+        "n_ads": 5,
+        "spend": 91076,
+        "pair_roas": 3.884,
+        "solo_a": 2.756,
+        "solo_b": 2.513,
+        "widened": false
+      }
+    }
+  ]
+}

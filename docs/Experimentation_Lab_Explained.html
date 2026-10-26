@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Experimentation Lab Explained</title>
+<style>
+  :root{--ink:#1d1b26;--muted:#5d5a6b;--line:#e6e3ef;--bg:#fbfaff;--card:#ffffff;--accent:#6d4fd6;--soft:#f1edff;--good:#16794a;--warn:#a15c00;--bad:#b3243b;--code:#f5f3fb}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 22px 90px}
+  h1{font-size:34px;line-height:1.15;margin:0 0 8px;letter-spacing:-.5px}
+  h2{font-size:24px;margin:54px 0 6px;padding-top:10px;border-top:1px solid var(--line);letter-spacing:-.2px}
+  h3{font-size:17px;margin:26px 0 6px}
+  p{margin:10px 0}
+  .lead{color:var(--muted);font-size:18px}
+  .tag{display:inline-block;background:var(--soft);color:var(--accent);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:99px;margin-bottom:8px}
+  .kid,.math,.real,.warn,.good{border-radius:14px;padding:14px 18px;margin:14px 0;border:1px solid var(--line);background:var(--card)}
+  .kid{background:#fff9e8;border-color:#f3e3b3}
+  .math{background:var(--code)}
+  .real{background:var(--soft);border-color:#ddd5fb}
+  .warn{background:#fff4e6;border-color:#f6d9ae}
+  .good{background:#eafaf1;border-color:#bfe8d0}
+  .kid b.t,.math b.t,.real b.t,.warn b.t,.good b.t{display:block;font-size:12px;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+  .kid b.t{color:#8a6a00}.math b.t{color:#4a3d8a}.real b.t{color:var(--accent)}.warn b.t{color:var(--warn)}.good b.t{color:var(--good)}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+  pre{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  ul,ol{padding-left:22px}li{margin:5px 0}
+  .toc a{color:var(--accent);text-decoration:none}.toc li{margin:3px 0}
+  .big{font-size:20px;font-weight:700}
+  @media print{body{background:#fff}.wrap{padding:0}h2{break-after:avoid}.kid,.math,.real,.warn,.good{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="tag">Plain-language guide</span>
+<h1>Experimentation Lab, explained</h1>
+<p class="lead">What it does, how the maths works, what the models are, and what you can safely promise. Written so a salesperson and an engineer can read the same page.</p>
+
+<div class="real"><b class="t">The 30-second version</b>
+Every ad is built from 5 creative choices. We look at what your past ads earned, remove the luck from those numbers, and ask: <i>which combination of the 5 choices is most likely to earn the most?</i> Then we test that question on ads the computer has never seen, and we only trust what survives that test. The honest answer today: <b>there is a small, real pattern, but we cannot yet promise a specific ROAS gain for any single product.</b></div>
+
+<ol class="toc">
+  <li><a href="#s1">The big idea: a pizza menu</a></li>
+  <li><a href="#s2">Words you need</a></li>
+  <li><a href="#s3">Step 1. Clean the data</a></li>
+  <li><a href="#s4">Step 2. Find the normal (the baseline)</a></li>
+  <li><a href="#s5">Step 3. Score each angle</a></li>
+  <li><a href="#s6">Step 4. Luck, and why we shrink numbers</a></li>
+  <li><a href="#s7">Step 5. Spend is proof</a></li>
+  <li><a href="#s8">Step 6. How hard to shrink (DerSimonian-Laird)</a></li>
+  <li><a href="#s9">Step 7. The rubber-band model (what we use now)</a></li>
+  <li><a href="#s10">Step 8. Teamwork between angles (synergy)</a></li>
+  <li><a href="#s11">Step 9. CatBoost, the second opinion</a></li>
+  <li><a href="#s12">Step 10. Blend the two</a></li>
+  <li><a href="#s13">Step 11. Pick the recipe</a></li>
+  <li><a href="#s14">Step 12. Test it on ads it has never seen</a></li>
+  <li><a href="#s15">Step 13. Be honest about the size of the gain</a></li>
+  <li><a href="#s16">What the tests actually showed</a></li>
+  <li><a href="#s17">What to say, and what never to say</a></li>
+  <li><a href="#s18">Glossary</a></li>
+</ol>
+
+<h2 id="s1">The big idea: a pizza menu</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+You are opening a pizza shop. Every pizza has 5 choices: <b>base, sauce, cheese, topping, crust</b>. Each choice has options (thin or thick base, tomato or white sauce, and so on). You have sold a few hundred pizzas before, with different mixes, and you know how much money each one made.
+<br>The question: <b>what is the best mix of the 5 choices?</b>
+<br>The trap: if one weird pizza made a lot of money once, that may be luck, not a great recipe. So we need a careful way to tell "good recipe" from "lucky pizza".</div>
+<p>An ad is the pizza. The 5 choices are called <b>stages</b>. The options are called <b>angles</b>. The money measure is <b>ROAS</b>.</p>
+
+<h2 id="s2">Words you need</h2>
+<table>
+<tr><th>Word</th><th>Pizza version</th><th>Ad version</th></tr>
+<tr><td><b>ROAS</b></td><td>Rupees earned for every rupee spent making and selling it</td><td>Revenue divided by ad spend. If you spent Rs 1 and got Rs 3 back, ROAS is 3x.</td></tr>
+<tr><td><b>Stage</b></td><td>One of the 5 choices (base, sauce, ...)</td><td>One of 5 parts of an ad: Problem, Hook, Claim (USP), Use-case, CTA (call to action)</td></tr>
+<tr><td><b>Angle</b></td><td>One option inside a choice, like "thin base"</td><td>A specific way of doing a stage, like the CTA "Comment for link"</td></tr>
+<tr><td><b>Recipe</b></td><td>One full pizza: 5 options picked</td><td>One angle chosen for each of the 5 stages</td></tr>
+<tr><td><b>Baseline</b></td><td>What an average pizza earns at your shop</td><td>The product's overall ROAS across all its ads. The "normal" we try to beat.</td></tr>
+<tr><td><b>Product</b></td><td>The shop (never mix two shops' numbers)</td><td>One product, like Night Repair Cream. Each product gets its own analysis.</td></tr>
+</table>
+<div class="real"><b class="t">Where the angle names come from</b>
+An AI first watches every ad and writes short notes for each stage (for example: the opening line, the claim, the call to action). A second AI step groups notes that mean the same thing under one label, so "Comment RED for link" and "Comment LINK below" both become the angle <b>Comment for link/info</b>. The AI only groups words. It never touches the numbers. All ROAS and spend figures come straight from your data.</div>
+
+<h2 id="s3">Step 1. Clean the data</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+If a pizza cost 10 rupees to make and one lucky customer paid 1,000, the "ROAS" looks like 100. That is a fluke, not a recipe. So we ignore pizzas that cost almost nothing.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>Keep an ad only if spend >= Rs 10
+ROAS of an ad  = revenue / spend
+Work in log scale: y = ln(1 + ROAS)</pre>
+Why the log: ROAS can be 0 or 40. On a log scale, one extreme ad cannot yank the average around. It is like measuring earthquakes on the Richter scale instead of raw energy.</div>
+<p><b>Example.</b> Night Repair Cream had 85 ads. 15 spent under Rs 10 and carried Rs 11,514 of "phantom" revenue. They are removed, leaving 70 ads.</p>
+
+<h2 id="s4">Step 2. Find the normal (the baseline)</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Add up all the money all pizzas made. Add up all the money spent. Divide. That is what a normal pizza earns. Every angle will be judged against this "normal".</div>
+<div class="math"><b class="t">The maths</b>
+<pre>Baseline B = (sum of all revenue) / (sum of all spend)</pre>
+We divide totals, not average the individual ROAS numbers. A big-spend ad should count more than a tiny-spend ad, because it tells us more.</div>
+<table>
+<tr><th>Ad</th><th class="n">Spend</th><th class="n">Revenue</th><th class="n">Own ROAS</th></tr>
+<tr><td>A</td><td class="n">Rs 100,000</td><td class="n">Rs 270,000</td><td class="n">2.7x</td></tr>
+<tr><td>B</td><td class="n">Rs 1,000</td><td class="n">Rs 5,000</td><td class="n">5.0x</td></tr>
+<tr><td colspan="4">Simple average of ROAS = (2.7 + 5.0) / 2 = 3.85x (wrong, B is tiny).<br>Baseline = 275,000 / 101,000 = <b>2.72x</b> (right, A dominates because it spent more).</td></tr>
+</table>
+<p><b>Example.</b> Night Repair Cream's baseline is <b>2.78x</b>.</p>
+
+<h2 id="s5">Step 3. Score each angle</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+For each option (say "thin base"), look at every pizza that used it, add the money, divide by the cost. That is how well that option did.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>Raw ROAS of angle g = (revenue of all ads using g) / (spend of all ads using g)</pre>
+We only look at angles used by at least 2 or 3 ads.</div>
+<p><b>Example.</b> "Personal transformation claim" (a hook) was used by 3 ads and earned <b>3.80x</b> against a 2.78x baseline. Looks amazing. Keep reading.</p>
+
+<h2 id="s6">Step 4. Luck, and why we shrink numbers</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+A new restaurant has two 5-star reviews. Is it a 5-star restaurant? Probably not that high. Maybe the two reviewers were the owner's friends. A restaurant with 2,000 reviews averaging 4.6 stars? Believe that one.
+<br><b>Shrinking</b> means: when there is little proof, pull the number back toward normal. When there is lots of proof, leave it alone.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>trusted ROAS = baseline + trust x (raw ROAS - baseline)
+trust is between 0 and 1
+   0 = ignore the angle's own number, assume it is normal
+   1 = believe the angle's number fully</pre>
+Another way to write it, used in the original Lab:
+<pre>trusted = (n x raw + K x baseline) / (n + K)
+n = number of ads for the angle,  K = how much doubt we add</pre>
+Think of K as "K imaginary average ads, added to every angle".</div>
+<p><b>Worked example.</b> Personal transformation claim: n = 3 ads, raw = 3.80, baseline = 2.78, K = 11.25.</p>
+<pre>trusted = (3 x 3.80 + 11.25 x 2.78) / (3 + 11.25)
+        = (11.40 + 31.28) / 14.25
+        = 2.99</pre>
+<p>It fell from 3.80x to 2.99x because only 3 ads stood behind it. An angle with 50 ads would barely move.</p>
+
+<h2 id="s7">Step 5. Spend is proof</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+A pizza that cost 10 rupees and one that cost 2 lakh are not equal evidence. After 2 lakh of sales, the result is solid. After 300 rupees of sales, it could be anything. <b>The more money behind a result, the more we trust it.</b></div>
+<p>We measured this in your data. The "wobble" of an ad's result (how far it strays from its product's normal) shrinks sharply as spend grows:</p>
+<table>
+<tr><th>Ad spend</th><th class="n">Wobble (variance of log ROAS)</th><th class="n">Plain meaning</th></tr>
+<tr><td>under Rs 430</td><td class="n">0.346</td><td>wild swings, about plus or minus 59%</td></tr>
+<tr><td>Rs 430 to 3,300</td><td class="n">0.194</td><td>plus or minus 44%</td></tr>
+<tr><td>Rs 3,300 to 8,700</td><td class="n">0.081</td><td>plus or minus 28%</td></tr>
+<tr><td>Rs 8,700 to 21,000</td><td class="n">0.061</td><td>plus or minus 25%</td></tr>
+<tr><td>Rs 21,000 to 61,000</td><td class="n">0.039</td><td>plus or minus 20%</td></tr>
+<tr><td>above Rs 61,000</td><td class="n">0.016</td><td>plus or minus 13%</td></tr>
+</table>
+<div class="math"><b class="t">The maths</b>
+<pre>Each ad gets a weight = 1 / wobble(spend)
+noisy small-spend ad  -> small weight
+solid big-spend ad    -> big weight</pre>
+In the model's fit, wobble is estimated from your data as about  <code>exp(a + b x ln(spend))</code>  with b around -0.4.</div>
+<div class="warn"><b class="t">An important catch (we measured it)</b>
+"This ad's ROAS is accurate" is NOT the same as "this hook caused it". A high-spend ad might have done well because of its audience, its offer or the creator, not the hook. We checked: even when an angle had over Rs 2 lakh behind it, only about <b>40%</b> of its extra ROAS showed up in other ads that used the same angle. And for angles seen in exactly one ad, we found no sign the result carried over (a small sample, so treat that as "no evidence" rather than "proven false").
+<table>
+<tr><th>Money behind the angle (other ads)</th><th class="n">Share of its lift seen in a new ad</th></tr>
+<tr><td>under Rs 2K</td><td class="n">about 0%</td></tr>
+<tr><td>Rs 2K to 10K</td><td class="n">about 12%</td></tr>
+<tr><td>Rs 10K to 50K</td><td class="n">about 46%</td></tr>
+<tr><td>Rs 50K to 2 lakh</td><td class="n">about 37%</td></tr>
+<tr><td>above Rs 2 lakh</td><td class="n">about 40%</td></tr>
+</table>
+So spend does buy trust, but it flattens out around 40%.</div>
+
+<h2 id="s8">Step 6. How hard to shrink (DerSimonian-Laird)</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Imagine two classes taking the same test. Inside each class, scores jump around a lot (some kids slept badly, some guessed). That jumping is <b>noise</b>. Now compare the two classes' averages. If the averages differ a lot more than the jumping inside each class would explain, then the classes are <i>really</i> different. If the averages differ only a little, it is probably just noise, so we should assume the classes are about the same.
+<br>DerSimonian-Laird does exactly this for angles. It decides <b>how much of the difference between angles is real</b>. If almost none is real, shrink hard.</div>
+<div class="math"><b class="t">The maths (engineers, this is for you)</b>
+<pre>sigma^2 = noise inside an angle (ads of the same angle disagree)
+tau^2   = real difference between angles (what is left after removing noise)
+K       = sigma^2 / tau^2     (then limited to between 0.5 and 20)
+
+weights  w_g = n_g / sigma^2
+Q        = sum of w_g x (mean_g - overall mean)^2
+tau^2    = max(0, (Q - (k - 1)) / (sum w - sum w^2 / sum w))</pre>
+k is the number of angles. The "(k - 1)" is what you would expect from pure noise alone, so subtracting it leaves only the genuine spread.</div>
+<p><b>Worked example (Night Repair Cream).</b> sigma^2 = 1.32 and tau^2 = 0.117, so <b>K = 11.25</b>. Meaning: noise is about 11 times bigger than real difference, so every angle gets pulled strongly toward normal.</p>
+<p>If K hits the limit of 20, the page says "low confidence: angles barely differ."</p>
+
+<h2 id="s9">Step 7. The rubber-band model (what we use now)</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Picture each option as a ball on a spring. The spring tries to keep every option at "normal". Data pulls an option up or down. A tight spring means "I won't move unless you show me lots of proof". A loose spring means "I move easily". We try many spring tightnesses and keep the one that predicts <i>pizzas we hid</i> best.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>y (an ad's result) =
+      product's normal
+    + effect of its Problem angle
+    + effect of its Hook angle
+    + effect of its Claim angle
+    + effect of its Use-case angle
+    + effect of its CTA angle
+    + effect of angle pairs (see Step 8)
+    + noise (smaller for big-spend ads)
+
+Each effect is pulled toward 0 by a penalty ("spring").
+Tightness lambda is chosen with leave-one-out error:
+   hide one ad, predict it, repeat for every ad, keep the lambda with the lowest total error.</pre>
+This is the same idea as DerSimonian-Laird (separate real effects from noise), made more flexible: it uses all 5 stages at once, uses spend to set noise, and picks the tightness by prediction error instead of a formula. Statisticians call it a <b>random-effects model</b> or <b>ridge regression</b>.</div>
+
+<h2 id="s10">Step 8. Teamwork between angles (synergy)</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Chocolate is good. Chips are good. Chocolate chip cookies are better than "good + good". That bonus is synergy. Sometimes a mix is worse (pineapple and fish). We keep both kinds of surprises.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>expected(A + B) = baseline + liftA + liftB
+synergy         = what the pair really earned - expected</pre></div>
+<p><b>Example.</b> "Skin brightening" claim + "Daily skincare" use-case: 3 ads, Rs 29K spent, earned <b>3.75x</b>. Expected from the two separately: <b>2.88x</b>. Synergy = <b>+0.88</b>.</p>
+<div class="warn"><b class="t">The catch</b>
+Pairs usually rest on 1 to 3 ads. That is thin, so in the new model a pair term only stays if it makes predictions for hidden ads better.</div>
+
+<h2 id="s11">Step 9. CatBoost, the second opinion</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+<b>A decision tree</b> is a game of 20 questions. "Is the product skincare? Is the hook a question? Is the CTA 'comment'?" You follow the answers down to a guess for the ROAS.
+<br><b>Boosting</b> is a team of tutors. Tutor 1 makes a rough guess. Tutor 2 looks only at Tutor 1's mistakes and learns to fix them. Tutor 3 fixes what is left. After a few hundred tutors, the team is very good.
+<br><b>CatBoost</b> is a well-made version of this team that is good at word-like choices (like angle names) and is built to avoid "memorising the answers".</div>
+<table>
+<tr><th>Good at</th><th>Careful about</th></tr>
+<tr><td>Finding combinations that work together, without us writing them down<br>Handling many text categories<br>Predicting ROAS well when errors are weighted by spend</td><td>With only a few hundred ads, it can memorise noise (like a student who learns last year's exam answers instead of the subject)<br>It is a "black box": it predicts, but does not give a tidy reason</td></tr>
+</table>
+<div class="math"><b class="t">What we fed it</b>
+Inputs: product + the 5 angles. Target: ln(1 + ROAS). Each ad weighted by (capped) spend. Output: a predicted ROAS. Settings are small on purpose: 250 trees, depth 4, strong regularisation.</div>
+
+<h2 id="s12">Step 10. Blend the two</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+You ask two friends to guess how many sweets are in a jar. One is careful and explains why. One has a great gut feeling but cannot say why. Averaging their guesses is usually closer than either guess alone.</div>
+<pre>blend prediction = 0.5 x (rubber-band model) + 0.5 x (CatBoost)</pre>
+
+<h2 id="s13">Step 11. Pick the recipe</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Write every possible pizza on a card, give each card a score using the blend, and pick the best card.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>Night Repair Cream angles per stage:  8 x 14 x 8 x 3 x 6 = 16,128 combinations
+(we only allow angles with at least 2 ads behind them, leaving about 3,600)
+score every one, take the highest</pre>
+The old Lab started from the best angle per stage and then swapped one stage at a time. Checking every card is cleaner and cannot miss a combination.</div>
+
+<h2 id="s14">Step 12. Test it on ads it has never seen</h2>
+<p>This is the most important step. A model that only works on the ads it learned from is useless. We use three safeguards.</p>
+<h3>1. Hide and predict (cross-validation)</h3>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Hide 1 in 5 of the pizzas. Learn from the other 4. Now guess how the hidden ones sold, and check your guesses against the real numbers. Do this 5 times, hiding a different fifth each time. Then repeat the whole thing 10 times with different random splits.</div>
+<h3>2. Measure the mistakes</h3>
+<table>
+<tr><th>Measure</th><th>Plain meaning</th><th>Good is</th></tr>
+<tr><td><b>Error weighted by spend</b></td><td>Average size of our guess errors, counting big-spend ads more</td><td>lower</td></tr>
+<tr><td><b>Rank correlation</b></td><td>Did we put the good ads above the weak ads? 0 = no better than random, 1 = perfect</td><td>higher</td></tr>
+<tr><td><b>Top 25% score</b></td><td>The quarter of hidden ads we rated highest: how did they earn vs their product's average? 1.03 = 3% better</td><td>above 1.00</td></tr>
+<tr><td><b>Bottom 25% score</b></td><td>The quarter we rated lowest. We want this below 1.00</td><td>below 1.00</td></tr>
+</table>
+<h3>3. The shuffle test (are we fooling ourselves?)</h3>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+Take all the pizza labels and shuffle them, so "thin base" is stuck on random pizzas. Now the labels mean nothing. Run the whole pipeline again. If our method <i>still</i> looks clever, it was just finding patterns in noise. If it only looks clever on the real labels, the pattern is real.</div>
+<p>We also always compare against the dull rival: "just guess the product's average". If we cannot beat that, we have added nothing.</p>
+
+<h2 id="s15">Step 13. Be honest about the size of the gain</h2>
+<div class="kid"><b class="t">Explain it like I am 8</b>
+A weather app says "100% sure it will rain". But you notice that when it says that, it only rains about 4 times out of 10. So you learn to trust it at 40% of what it says. Same here: we check how much of a predicted ROAS gain really showed up on hidden ads, then scale the claim to match.</div>
+<div class="math"><b class="t">The maths</b>
+<pre>calibration slope = (gain that showed up on hidden ads) / (gain the model predicted)
+expected gain     = model's claim x calibration slope</pre>
+Slope 1.0 = model is honest. 0.3 = only 30% of the claim was real. 0 or less = no evidence at all.</div>
+
+<h2 id="s16">What the tests actually showed</h2>
+<p>Final confirmation run: 10 repeated hide-and-predict runs, 12 shuffle runs, 15 nested tuning runs.</p>
+
+<table>
+<tr><th>Model</th><th class="n">Error (spend-weighted)</th><th class="n">Rank correlation</th><th class="n">Top 25% scored</th><th class="n">Bottom 25% scored</th></tr>
+<tr><td>Rubber-band model only</td><td class="n">0.349</td><td class="n">0.113</td><td class="n">1.037</td><td class="n">0.976</td></tr>
+<tr><td>CatBoost only</td><td class="n">0.319</td><td class="n">0.080</td><td class="n">1.026</td><td class="n">0.971</td></tr>
+<tr><td><b>Blend (what we use)</b></td><td class="n"><b>0.321</b></td><td class="n"><b>0.110</b></td><td class="n"><b>1.020</b></td><td class="n"><b>0.966</b></td></tr>
+<tr><td>Dull rival: product average</td><td class="n">about 0.374</td><td class="n">none</td><td class="n">none</td><td class="n">none</td></tr>
+</table>
+
+<div class="good"><b class="t">What we ARE confident about</b>
+<ul>
+<li><b>The blend predicts hidden ads better than the dull rival</b> (error about 0.32 against about 0.37).</li>
+<li><b>It ranks ads in the right direction.</b> Hidden ads it rated top-quarter earned about <b>2% more</b> than their product's average. Those it rated bottom-quarter earned about <b>3% less</b>.</li>
+<li><b>The pattern is not pure luck.</b> In the shuffle test, none of the 12 shuffled runs matched the real blend on error or on rank correlation (the smallest possible p-value with 12 shuffles is about 0.08, so 0 of 12 is the best result we can show with that many). On the top-quarter score, 1 of 12 shuffles matched it, so that signal is weaker.</li>
+<li><b>Spend-based trust is backed by data</b> (the wobble table and the "40% flattening" table above).</li>
+</ul></div>
+
+<div class="warn"><b class="t">What we are NOT confident about</b>
+<ul>
+<li><b>We cannot promise a specific ROAS gain for a single product.</b> The calibration slope per product, with an 80% confidence range:
+<table>
+<tr><th>Product</th><th class="n">Slope</th><th class="n">80% range</th><th>Reading</th></tr>
+<tr><td>Night Repair Cream (41 big ads)</td><td class="n">0.01</td><td class="n">-0.33 to 0.68</td><td>Could be zero. Not demonstrated.</td></tr>
+<tr><td>Hair Colour / Hair Dye (26 big ads)</td><td class="n">-0.57</td><td class="n">-1.09 to -0.13</td><td>Predictions moved the wrong way. No gain.</td></tr>
+<tr><td>Root Touch-Up Powder (8 big ads)</td><td class="n">0.77</td><td class="n">-0.49 to 1.20</td><td>Too few ads to say anything.</td></tr>
+</table></li>
+<li><b>An earlier version of the page showed "+3.2%" for Night Repair Cream.</b> That used only 2 repeats and a noisy slope. With 10 repeats it is about zero. Treat that figure as withdrawn.</li>
+<li><b>The effect is small</b> (a few percent), even where it exists.</li>
+<li><b>Tuning CatBoost further did not help the blend.</b> Tuned CatBoost alone was slightly better (error 0.319 against 0.326), but the blend with it was not (0.327 against 0.321), so we keep the simple default settings.</li>
+<li><b>We have no dates</b>, so we cannot test "does a recipe built on old ads still work on newer ads".</li>
+</ul></div>
+
+<div class="real"><b class="t">The honest one-line verdict</b>
+We have a sound, tested way to <b>rank which creative choices tend to do better</b>, with a small, real, repeatable signal. We do <b>not</b> yet have proof of a specific incremental ROAS for any one product. The next step is not more maths. It is a <b>live test</b>: run the recommended recipe against a normal ad with the same audience and budget, and measure the difference.</div>
+
+<h2 id="s17">What to say, and what never to say</h2>
+<table>
+<tr><th>Safe to say</th><th>Never say</th></tr>
+<tr><td>"It ranks creative choices using your past ads, with luck removed."</td><td>"It will raise your ROAS by X%."</td></tr>
+<tr><td>"We tested it on ads it had never seen and it beat a simple average."</td><td>"It is proven" or "it is accurate to 95%".</td></tr>
+<tr><td>"The signal is real but small."</td><td>"This recipe is the best possible ad."</td></tr>
+<tr><td>"The right way to confirm is a controlled live test."</td><td>"Use this recipe instead of testing."</td></tr>
+<tr><td>"Products with few ads are shown as 'not enough data'."</td><td>"It works for every product."</td></tr>
+</table>
+
+<h3>If someone asks...</h3>
+<ul>
+<li><b>"Why not just copy our best ad?"</b> One best ad is one lucky draw. The Lab looks across many ads and removes luck.</li>
+<li><b>"Why does a big-spend ad matter more?"</b> More money behind a result means less luck in it.</li>
+<li><b>"Is AI deciding this?"</b> Two simple tools do the maths (a shrinkage model and CatBoost). An AI only reads the ads at the start to label them. It never touches the numbers.</li>
+<li><b>"Why did my favourite hook not win?"</b> Either it had too few ads, or its good result was mostly luck or audience.</li>
+<li><b>"Why no recipe for my other products?"</b> We need at least 3 ads per angle per stage. Seven products are below that.</li>
+</ul>
+
+<h2 id="s18">Glossary</h2>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Baseline</td><td>A product's overall ROAS; the normal to beat</td></tr>
+<tr><td>Shrinkage</td><td>Pulling a number toward normal when evidence is thin</td></tr>
+<tr><td>K</td><td>How much doubt to add; bigger K means shrink harder</td></tr>
+<tr><td>Noise (sigma squared)</td><td>How much ads with the same angle disagree</td></tr>
+<tr><td>Real spread (tau squared)</td><td>How much angles truly differ after removing noise</td></tr>
+<tr><td>Random-effects model</td><td>A model that gives each angle an effect and pulls effects toward zero by a tuned amount</td></tr>
+<tr><td>Ridge penalty / lambda</td><td>The "spring tightness" that pulls effects toward zero</td></tr>
+<tr><td>Leave-one-out</td><td>Hide one ad, predict it, repeat for every ad</td></tr>
+<tr><td>Synergy</td><td>Extra (or lost) ROAS when two angles are used together</td></tr>
+<tr><td>CatBoost</td><td>A tool that builds many small decision trees, each fixing the last one's mistakes</td></tr>
+<tr><td>Overfitting</td><td>Memorising the training ads instead of learning what generalises</td></tr>
+<tr><td>Cross-validation</td><td>Hide part of the data, learn from the rest, test on the hidden part</td></tr>
+<tr><td>Shuffle (permutation) test</td><td>Scramble the labels and check whether the method still looks clever</td></tr>
+<tr><td>Calibration</td><td>Scaling a model's claim to how much of it actually held up</td></tr>
+<tr><td>Incremental ROAS</td><td>Extra ROAS caused by the recipe, compared with a comparable normal ad. Only a live control test proves this.</td></tr>
+</table>
+
+</div>
+</body>
+</html>

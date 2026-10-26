@@ -1,0 +1,1766 @@
+{
+ "meta": {
+  "blend_wMAE": 0.328,
+  "base_wMAE": 0.375,
+  "old_wMAE": 0.378,
+  "n_ads": 251,
+  "shuffle_note": "0 of 12 shuffled-label runs matched the real error and ranking"
+ },
+ "products": [
+  {
+   "id": "night-repair-cream",
+   "name": "Night Repair Cream",
+   "ads": 70,
+   "spend": 3865322.1099999994,
+   "baseline": 2.780618904228916,
+   "grid": 3600,
+   "bands": [
+    {
+     "label": "Rs10 to 1K",
+     "n": 15,
+     "spread": 0.61739651659893,
+     "spend": 3786.8500000000004
+    },
+    {
+     "label": "Rs1K to 10K",
+     "n": 14,
+     "spread": 0.18564477072707422,
+     "spend": 85691.17000000001
+    },
+    {
+     "label": "Rs10K to 50K",
+     "n": 23,
+     "spread": 0.15362744292591568,
+     "spend": 557374.7000000001
+    },
+    {
+     "label": "Rs50K and above",
+     "n": 18,
+     "spread": 0.07248895000409356,
+     "spend": 3218469.39
+    }
+   ],
+   "stages": [
+    {
+     "stage": "problem-statement",
+     "rows": [
+      {
+       "angle": "Product texture/staining concern",
+       "n": 2,
+       "spend": 58383.21,
+       "raw": 2.817174149896862,
+       "adj": 2.8328640314689855,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Product safety/authenticity concern",
+       "n": 5,
+       "spend": 245610.50999999998,
+       "raw": 2.8947912693149815,
+       "adj": 2.8002904121043226,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Overly complex skincare routine",
+       "n": 3,
+       "spend": 31261.9,
+       "raw": 2.357556322552372,
+       "adj": 2.742884640092806,
+       "tier": "Some"
+      },
+      {
+       "angle": "Skin dullness & pigmentation",
+       "n": 42,
+       "spend": 2859662.8899999997,
+       "raw": 2.749808936395297,
+       "adj": 2.624195411081071,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Dry skin & ineffective products",
+       "n": 2,
+       "spend": 823.0699999999999,
+       "raw": 2.5170884614917326,
+       "adj": 2.547303310636188,
+       "tier": "Thin"
+      },
+      {
+       "angle": "Acne & scar concerns",
+       "n": 4,
+       "spend": 114432.67000000001,
+       "raw": 2.253151918940631,
+       "adj": 2.4146079670919134,
+       "tier": "Solid"
+      }
+     ],
+     "total_angles": 6,
+     "picked": "Product texture/staining concern",
+     "final": "Product safety/authenticity concern"
+    },
+    {
+     "stage": "hook-line",
+     "rows": [
+      {
+       "angle": "Product/brand endorsement",
+       "n": 8,
+       "spend": 1007042.86,
+       "raw": 2.810513000409933,
+       "adj": 2.7975592948305437,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Authenticity of Ayurveda",
+       "n": 3,
+       "spend": 164921.43,
+       "raw": 3.036356706341923,
+       "adj": 2.7292379654974606,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Personal product review opener",
+       "n": 12,
+       "spend": 355839.81,
+       "raw": 2.8501081427623287,
+       "adj": 2.6833495828912777,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Daily routine vibes",
+       "n": 2,
+       "spend": 11616.189999999999,
+       "raw": 3.7188096957780474,
+       "adj": 2.6681127341631523,
+       "tier": "Some"
+      },
+      {
+       "angle": "Personal transformation claim",
+       "n": 3,
+       "spend": 69178.32,
+       "raw": 3.7947968380845323,
+       "adj": 2.653373865991004,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Skin problem narrative",
+       "n": 15,
+       "spend": 557952.27,
+       "raw": 2.7261616123544044,
+       "adj": 2.624195411081071,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Product introduction",
+       "n": 6,
+       "spend": 529681.03,
+       "raw": 2.708049012062977,
+       "adj": 2.54238993939305,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Teaser for glowing skin",
+       "n": 8,
+       "spend": 594153.21,
+       "raw": 2.8050137101842805,
+       "adj": 2.526063789106261,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 10,
+     "picked": "Product/brand endorsement",
+     "final": "Authenticity of Ayurveda"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "rows": [
+      {
+       "angle": "Skin brightening & tan removal",
+       "n": 19,
+       "spend": 1043789.5,
+       "raw": 2.890642049953559,
+       "adj": 2.7559708171137753,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Authentic Ayurvedic formulation",
+       "n": 24,
+       "spend": 1871202.12,
+       "raw": 2.801127507273239,
+       "adj": 2.624195411081071,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Product quality & user experience",
+       "n": 4,
+       "spend": 176073.85,
+       "raw": 3.159423048908171,
+       "adj": 2.5947684432903375,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Specific ingredient night repair",
+       "n": 15,
+       "spend": 731231.22,
+       "raw": 2.410520190863842,
+       "adj": 2.4988648492809777,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Specific ingredient concentration for glow",
+       "n": 2,
+       "spend": 138.71,
+       "raw": 0.0,
+       "adj": 2.4247885838643994,
+       "tier": "Thin"
+      },
+      {
+       "angle": "Multi-benefit skin solution",
+       "n": 4,
+       "spend": 7465.839999999999,
+       "raw": 3.6250495590583243,
+       "adj": 2.4102032528645094,
+       "tier": "Thin"
+      }
+     ],
+     "total_angles": 6,
+     "picked": "Skin brightening & tan removal",
+     "final": "Authentic Ayurvedic formulation"
+    },
+    {
+     "stage": "use-case-scenario",
+     "rows": [
+      {
+       "angle": "Nighttime skincare & repair",
+       "n": 62,
+       "spend": 3322290.4699999997,
+       "raw": 2.7775371910813087,
+       "adj": 2.624195411081071,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Daily skincare & wellness",
+       "n": 6,
+       "spend": 448173.42999999993,
+       "raw": 2.8539603742238806,
+       "adj": 2.5586952792879893,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 2,
+     "picked": "Nighttime skincare & repair",
+     "final": "Nighttime skincare & repair"
+    },
+    {
+     "stage": "cta-text",
+     "rows": [
+      {
+       "angle": "Follow for more",
+       "n": 2,
+       "spend": 146142.65,
+       "raw": 2.7372700577141584,
+       "adj": 2.8092068627817226,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Trial & observe results",
+       "n": 6,
+       "spend": 414934.5,
+       "raw": 2.4681892684267037,
+       "adj": 2.7136828221060307,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Soft engagement CTA",
+       "n": 3,
+       "spend": 87776.28,
+       "raw": 2.448567767966471,
+       "adj": 2.6598482067673244,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Shop online/now",
+       "n": 3,
+       "spend": 81052.52,
+       "raw": 2.615975542771526,
+       "adj": 2.6472199599666353,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Comment for link/info",
+       "n": 43,
+       "spend": 2258132.85,
+       "raw": 2.78196678286665,
+       "adj": 2.624195411081071,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 5,
+     "picked": "Follow for more",
+     "final": "Follow for more"
+    }
+   ],
+   "syn_top": [
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Product quality & user experience",
+     "sB": "use-case-scenario",
+     "aB": "Nighttime skincare & repair",
+     "n": 3,
+     "spend": 81445.19,
+     "obs": 3.8838742963212436,
+     "exp": 2.438344950142492,
+     "syn": 1.4455293461787515
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Personal transformation claim",
+     "sB": "use-case-scenario",
+     "aB": "Nighttime skincare & repair",
+     "n": 3,
+     "spend": 69178.32,
+     "obs": 3.7947968380845323,
+     "exp": 2.4969503728431586,
+     "syn": 1.2978464652413737
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Skin brightening & tan removal",
+     "sB": "use-case-scenario",
+     "aB": "Daily skincare & wellness",
+     "n": 3,
+     "spend": 29240.010000000002,
+     "obs": 3.7506799758276412,
+     "exp": 2.5340471921728485,
+     "syn": 1.2166327836547928
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Personal product review opener",
+     "sB": "primary-usp-claim",
+     "aB": "Skin brightening & tan removal",
+     "n": 3,
+     "spend": 12740.279999999999,
+     "obs": 3.4134030021318216,
+     "exp": 2.658701495776137,
+     "syn": 0.7547015063556848
+    }
+   ],
+   "syn_bot": [
+    {
+     "sA": "problem-statement",
+     "aA": "Overly complex skincare routine",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 3,
+     "spend": 31261.9,
+     "obs": 2.357556322552372,
+     "exp": 2.5864611469449605,
+     "syn": -0.2289048243925884
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Overly complex skincare routine",
+     "sB": "use-case-scenario",
+     "aB": "Nighttime skincare & repair",
+     "n": 3,
+     "spend": 31261.9,
+     "obs": 2.357556322552372,
+     "exp": 2.5864611469449605,
+     "syn": -0.2289048243925884
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Skin dullness & pigmentation",
+     "sB": "cta-text",
+     "aB": "Trial & observe results",
+     "n": 3,
+     "spend": 344634.07999999996,
+     "obs": 2.3742435455019426,
+     "exp": 2.5572593289581853,
+     "syn": -0.1830157834562427
+    }
+   ],
+   "steps4": [
+    {
+     "stage": "problem-statement",
+     "solo": "Product texture/staining concern",
+     "final": "Product safety/authenticity concern",
+     "changed": true,
+     "gain": 0.016094294732535985
+    },
+    {
+     "stage": "hook-line",
+     "solo": "Product/brand endorsement",
+     "final": "Authenticity of Ayurveda",
+     "changed": true,
+     "gain": 0.021969629797707668
+    },
+    {
+     "stage": "primary-usp-claim",
+     "solo": "Skin brightening & tan removal",
+     "final": "Authentic Ayurvedic formulation",
+     "changed": true,
+     "gain": 0.061067335396328026
+    },
+    {
+     "stage": "use-case-scenario",
+     "solo": "Nighttime skincare & repair",
+     "final": "Nighttime skincare & repair",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "cta-text",
+     "solo": "Follow for more",
+     "final": "Follow for more",
+     "changed": false,
+     "gain": 0.0
+    }
+   ],
+   "solo_pred": 3.0726509160296076,
+   "final_pred": 3.129787979850372,
+   "alts": [
+    {
+     "recipe": [
+      "Product safety/authenticity concern",
+      "Authenticity of Ayurveda",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.129787979850372
+    },
+    {
+     "recipe": [
+      "Product texture/staining concern",
+      "Product/brand endorsement",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.1181473794444234
+    },
+    {
+     "recipe": [
+      "Product texture/staining concern",
+      "Authenticity of Ayurveda",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.113693685117836
+    },
+    {
+     "recipe": [
+      "Product safety/authenticity concern",
+      "Authenticity of Ayurveda",
+      "Authentic Ayurvedic formulation",
+      "Daily skincare & wellness",
+      "Follow for more"
+     ],
+     "pred": 3.1095798476638667
+    },
+    {
+     "recipe": [
+      "Product safety/authenticity concern",
+      "Product/brand endorsement",
+      "Authentic Ayurvedic formulation",
+      "Nighttime skincare & repair",
+      "Follow for more"
+     ],
+     "pred": 3.107818350052664
+    }
+   ],
+   "evidence": [
+    {
+     "sA": "problem-statement",
+     "aA": "Product safety/authenticity concern",
+     "sB": "hook-line",
+     "aB": "Authenticity of Ayurveda",
+     "n": 2,
+     "spend": 133657.16,
+     "obs": 3.0556330839290613,
+     "exp": 2.748909473372867,
+     "syn": 0.30672361055619435
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Product safety/authenticity concern",
+     "sB": "primary-usp-claim",
+     "aB": "Authentic Ayurvedic formulation",
+     "n": 4,
+     "spend": 233693.3,
+     "obs": 2.8651877910064174,
+     "exp": 2.643866918956477,
+     "syn": 0.22132087204994022
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Product safety/authenticity concern",
+     "sB": "use-case-scenario",
+     "aB": "Nighttime skincare & repair",
+     "n": 5,
+     "spend": 245610.50999999998,
+     "obs": 2.8947912693149815,
+     "exp": 2.643866918956477,
+     "syn": 0.25092435035850436
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Product safety/authenticity concern",
+     "sB": "cta-text",
+     "aB": "Follow for more",
+     "n": 0,
+     "spend": 0.0,
+     "obs": null,
+     "exp": null,
+     "syn": null
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Authenticity of Ayurveda",
+     "sB": "primary-usp-claim",
+     "aB": "Authentic Ayurvedic formulation",
+     "n": 3,
+     "spend": 164921.43,
+     "obs": 3.036356706341923,
+     "exp": 2.572814472349615,
+     "syn": 0.46354223399230765
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Authenticity of Ayurveda",
+     "sB": "use-case-scenario",
+     "aB": "Nighttime skincare & repair",
+     "n": 2,
+     "spend": 133657.16,
+     "obs": 3.0556330839290613,
+     "exp": 2.572814472349615,
+     "syn": 0.48281861157944617
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Authenticity of Ayurveda",
+     "sB": "cta-text",
+     "aB": "Follow for more",
+     "n": 0,
+     "spend": 0.0,
+     "obs": null,
+     "exp": null,
+     "syn": null
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Authentic Ayurvedic formulation",
+     "sB": "use-case-scenario",
+     "aB": "Nighttime skincare & repair",
+     "n": 22,
+     "spend": 1453120.1700000002,
+     "obs": 2.8027176444739594,
+     "exp": 2.4677719179332254,
+     "syn": 0.33494572654073407
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Authentic Ayurvedic formulation",
+     "sB": "cta-text",
+     "aB": "Follow for more",
+     "n": 1,
+     "spend": 128518.83,
+     "obs": 2.5954202975548406,
+     "exp": 2.652783369633877,
+     "syn": -0.05736307207903657
+    },
+    {
+     "sA": "use-case-scenario",
+     "aA": "Nighttime skincare & repair",
+     "sB": "cta-text",
+     "aB": "Follow for more",
+     "n": 1,
+     "spend": 128518.83,
+     "obs": 2.5954202975548406,
+     "exp": 2.652783369633877,
+     "syn": -0.05736307207903657
+    }
+   ],
+   "tested": 8,
+   "full_runs": 0,
+   "m4": {
+    "n": 2,
+    "spend": 133657.16,
+    "roas": 3.0556330839290613
+   },
+   "m3": {
+    "n": 5,
+    "spend": 362212.13,
+    "roas": 2.76946984078087
+   },
+   "closest": [
+    {
+     "ad_id": "120241813383200425",
+     "match": 4,
+     "spend": 116315.22,
+     "roas": 3.002534148153612,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120241813383200425_creative.mp4"
+    },
+    {
+     "ad_id": "120241834139810425",
+     "match": 4,
+     "spend": 17341.94,
+     "roas": 3.4117763064570634,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120241834139810425_creative.mp4"
+    },
+    {
+     "ad_id": "120247891879710425",
+     "match": 3,
+     "spend": 128518.83,
+     "roas": 2.5954202975548406,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120247891879710425_creative.mp4"
+    },
+    {
+     "ad_id": "120239460542440425",
+     "match": 3,
+     "spend": 74824.34,
+     "roas": 2.8020108162664714,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120239460542440425_creative.mp4"
+    }
+   ],
+   "pred_modal": 2.624195411081071,
+   "lo": 2.4376403613800575,
+   "hi": 3.9612952390603597,
+   "naive": 3.1246071148099457,
+   "recipe_support": [
+    {
+     "stage": "problem-statement",
+     "angle": "Product safety/authenticity concern",
+     "n": 5,
+     "spend": 245610.50999999998,
+     "tier": "Strong"
+    },
+    {
+     "stage": "hook-line",
+     "angle": "Authenticity of Ayurveda",
+     "n": 3,
+     "spend": 164921.43,
+     "tier": "Solid"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "angle": "Authentic Ayurvedic formulation",
+     "n": 24,
+     "spend": 1871202.12,
+     "tier": "Strong"
+    },
+    {
+     "stage": "use-case-scenario",
+     "angle": "Nighttime skincare & repair",
+     "n": 62,
+     "spend": 3322290.4699999997,
+     "tier": "Strong"
+    },
+    {
+     "stage": "cta-text",
+     "angle": "Follow for more",
+     "n": 2,
+     "spend": 146142.65,
+     "tier": "Solid"
+    }
+   ],
+   "calib": {
+    "slope": 0.005069356706165312,
+    "lo": -0.3257584688809801,
+    "hi": 0.6834760487249754,
+    "n": 41
+   }
+  },
+  {
+   "id": "hair-colour-dye",
+   "name": "Hair Colour / Hair Dye",
+   "ads": 49,
+   "spend": 1948550.0200000003,
+   "baseline": 2.4616148935196436,
+   "grid": 36,
+   "bands": [
+    {
+     "label": "Rs10 to 1K",
+     "n": 8,
+     "spread": 0.7636380432366493,
+     "spend": 1227.95
+    },
+    {
+     "label": "Rs1K to 10K",
+     "n": 15,
+     "spread": 0.3324941060717129,
+     "spend": 94847.37999999999
+    },
+    {
+     "label": "Rs10K to 50K",
+     "n": 12,
+     "spread": 0.09364348823821145,
+     "spend": 313967.50999999995
+    },
+    {
+     "label": "Rs50K and above",
+     "n": 14,
+     "spread": 0.1204959224811444,
+     "spend": 1538507.18
+    }
+   ],
+   "stages": [
+    {
+     "stage": "problem-statement",
+     "rows": [
+      {
+       "angle": "Grey hair & dye damage",
+       "n": 42,
+       "spend": 1475921.62,
+       "raw": 2.478969953702555,
+       "adj": 2.4973740956126687,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 1,
+     "picked": "Grey hair & dye damage",
+     "final": "Grey hair & dye damage"
+    },
+    {
+     "stage": "hook-line",
+     "rows": [
+      {
+       "angle": "Personal product review opener",
+       "n": 3,
+       "spend": 211669.61,
+       "raw": 2.9130470358971228,
+       "adj": 2.580355703474812,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Direct grey hair problem",
+       "n": 17,
+       "spend": 409012.95999999996,
+       "raw": 2.406560418036632,
+       "adj": 2.4973740956126687,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Highlighting product features (no harsh chemicals)",
+       "n": 8,
+       "spend": 392412.52,
+       "raw": 2.7913779356479242,
+       "adj": 2.4934864226218703,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Product introduction",
+       "n": 5,
+       "spend": 240720.74,
+       "raw": 2.1730665583696696,
+       "adj": 2.3956909646316005,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Exclamatory/surprise opener",
+       "n": 3,
+       "spend": 44133.04,
+       "raw": 2.2745385316760416,
+       "adj": 2.332746058903023,
+       "tier": "Some"
+      },
+      {
+       "angle": "Family interaction hook",
+       "n": 5,
+       "spend": 34856.14,
+       "raw": 2.077814410890018,
+       "adj": 2.207537167011085,
+       "tier": "Some"
+      }
+     ],
+     "total_angles": 6,
+     "picked": "Personal product review opener",
+     "final": "Personal product review opener"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "rows": [
+      {
+       "angle": "No harsh chemicals in hair dye",
+       "n": 45,
+       "spend": 1752864.1100000003,
+       "raw": 2.4799460352919196,
+       "adj": 2.4973740956126687,
+       "tier": "Strong"
+      },
+      {
+       "angle": "High-level endorsement",
+       "n": 2,
+       "spend": 174949.15,
+       "raw": 2.279592270096768,
+       "adj": 2.4039577636502845,
+       "tier": "Solid"
+      }
+     ],
+     "total_angles": 2,
+     "picked": "No harsh chemicals in hair dye",
+     "final": "No harsh chemicals in hair dye"
+    },
+    {
+     "stage": "use-case-scenario",
+     "rows": [
+      {
+       "angle": "Grey hair coverage",
+       "n": 43,
+       "spend": 1501602.6500000004,
+       "raw": 2.430873946579675,
+       "adj": 2.4973740956126687,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 1,
+     "picked": "Grey hair coverage",
+     "final": "Grey hair coverage"
+    },
+    {
+     "stage": "cta-text",
+     "rows": [
+      {
+       "angle": "Direct product trial",
+       "n": 5,
+       "spend": 511628.81000000006,
+       "raw": 2.3242429995292873,
+       "adj": 2.5055517804403165,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Comment for link/info",
+       "n": 21,
+       "spend": 767270.94,
+       "raw": 2.530787416502442,
+       "adj": 2.4973740956126687,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Shop online/now",
+       "n": 6,
+       "spend": 152940.21000000002,
+       "raw": 2.3430834834083196,
+       "adj": 2.439188004299309,
+       "tier": "Solid"
+      }
+     ],
+     "total_angles": 3,
+     "picked": "Direct product trial",
+     "final": "Comment for link/info"
+    }
+   ],
+   "syn_top": [
+    {
+     "sA": "hook-line",
+     "aA": "Highlighting product features (no harsh chemicals)",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 3,
+     "spend": 111804.39,
+     "obs": 2.984720904071835,
+     "exp": 2.5292456247148953,
+     "syn": 0.45547527935693966
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "hook-line",
+     "aB": "Highlighting product features (no harsh chemicals)",
+     "n": 7,
+     "spend": 263969.84,
+     "obs": 2.895695015763922,
+     "exp": 2.5292456247148953,
+     "syn": 0.36644939104902674
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "hook-line",
+     "aB": "Personal product review opener",
+     "n": 3,
+     "spend": 211669.61,
+     "obs": 2.9130470358971228,
+     "exp": 2.616114905567837,
+     "syn": 0.29693213032928556
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Personal product review opener",
+     "sB": "primary-usp-claim",
+     "aB": "No harsh chemicals in hair dye",
+     "n": 3,
+     "spend": 211669.61,
+     "obs": 2.9130470358971228,
+     "exp": 2.616114905567837,
+     "syn": 0.29693213032928556
+    }
+   ],
+   "syn_bot": [
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "cta-text",
+     "aB": "Direct product trial",
+     "n": 4,
+     "spend": 364568.82,
+     "obs": 2.282431448745397,
+     "exp": 2.5413109825333415,
+     "syn": -0.25887953378794437
+    },
+    {
+     "sA": "use-case-scenario",
+     "aA": "Grey hair coverage",
+     "sB": "cta-text",
+     "aB": "Direct product trial",
+     "n": 5,
+     "spend": 511628.81000000006,
+     "obs": 2.3242429995292873,
+     "exp": 2.5413109825333415,
+     "syn": -0.21706798300405428
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "No harsh chemicals in hair dye",
+     "sB": "cta-text",
+     "aB": "Direct product trial",
+     "n": 5,
+     "spend": 511628.81000000006,
+     "obs": 2.3242429995292873,
+     "exp": 2.5413109825333415,
+     "syn": -0.21706798300405428
+    }
+   ],
+   "steps4": [
+    {
+     "stage": "problem-statement",
+     "solo": "Grey hair & dye damage",
+     "final": "Grey hair & dye damage",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "hook-line",
+     "solo": "Personal product review opener",
+     "final": "Personal product review opener",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "primary-usp-claim",
+     "solo": "No harsh chemicals in hair dye",
+     "final": "No harsh chemicals in hair dye",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "use-case-scenario",
+     "solo": "Grey hair coverage",
+     "final": "Grey hair coverage",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "cta-text",
+     "solo": "Direct product trial",
+     "final": "Comment for link/info",
+     "changed": true,
+     "gain": 0.02445579683208221
+    }
+   ],
+   "solo_pred": 2.555899906642731,
+   "final_pred": 2.580355703474813,
+   "alts": [
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Personal product review opener",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Comment for link/info"
+     ],
+     "pred": 2.580355703474813
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Personal product review opener",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Direct product trial"
+     ],
+     "pred": 2.555899906642731
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Personal product review opener",
+      "High-level endorsement",
+      "Grey hair coverage",
+      "Direct product trial"
+     ],
+     "pred": 2.5159507085077277
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Direct product trial"
+     ],
+     "pred": 2.5055517804403165
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "No harsh chemicals in hair dye",
+      "Grey hair coverage",
+      "Comment for link/info"
+     ],
+     "pred": 2.4973740956126687
+    }
+   ],
+   "evidence": [
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "hook-line",
+     "aB": "Personal product review opener",
+     "n": 3,
+     "spend": 211669.61,
+     "obs": 2.9130470358971228,
+     "exp": 2.616114905567837,
+     "syn": 0.29693213032928556
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "primary-usp-claim",
+     "aB": "No harsh chemicals in hair dye",
+     "n": 41,
+     "spend": 1469124.0,
+     "obs": 2.476755930745124,
+     "exp": 2.5331332977056937,
+     "syn": -0.05637736696056983
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "use-case-scenario",
+     "aB": "Grey hair coverage",
+     "n": 41,
+     "spend": 1346348.55,
+     "obs": 2.4309124409128673,
+     "exp": 2.5331332977056937,
+     "syn": -0.10222085679282644
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 21,
+     "spend": 767270.94,
+     "obs": 2.530787416502442,
+     "exp": 2.5331332977056937,
+     "syn": -0.002345881203251743
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Personal product review opener",
+     "sB": "primary-usp-claim",
+     "aB": "No harsh chemicals in hair dye",
+     "n": 3,
+     "spend": 211669.61,
+     "obs": 2.9130470358971228,
+     "exp": 2.616114905567837,
+     "syn": 0.29693213032928556
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Personal product review opener",
+     "sB": "use-case-scenario",
+     "aB": "Grey hair coverage",
+     "n": 3,
+     "spend": 211669.61,
+     "obs": 2.9130470358971228,
+     "exp": 2.616114905567837,
+     "syn": 0.29693213032928556
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Personal product review opener",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 3,
+     "spend": 211669.61,
+     "obs": 2.9130470358971228,
+     "exp": 2.616114905567837,
+     "syn": 0.29693213032928556
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "No harsh chemicals in hair dye",
+     "sB": "use-case-scenario",
+     "aB": "Grey hair coverage",
+     "n": 42,
+     "spend": 1494805.03,
+     "obs": 2.4284792445473635,
+     "exp": 2.5331332977056937,
+     "syn": -0.10465405315833021
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "No harsh chemicals in hair dye",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 21,
+     "spend": 767270.94,
+     "obs": 2.530787416502442,
+     "exp": 2.5331332977056937,
+     "syn": -0.002345881203251743
+    },
+    {
+     "sA": "use-case-scenario",
+     "aA": "Grey hair coverage",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 21,
+     "spend": 767270.94,
+     "obs": 2.530787416502442,
+     "exp": 2.5331332977056937,
+     "syn": -0.002345881203251743
+    }
+   ],
+   "tested": 10,
+   "full_runs": 3,
+   "m4": {
+    "n": 21,
+    "spend": 767270.94,
+    "roas": 2.530787416502442
+   },
+   "m3": {
+    "n": 40,
+    "spend": 1339550.93,
+    "roas": 2.4282403879933105
+   },
+   "closest": [
+    {
+     "ad_id": "120249502131330425",
+     "match": 5,
+     "spend": 178296.03,
+     "roas": 2.9738629065380757,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120249502131330425_creative.mp4"
+    },
+    {
+     "ad_id": "120248442931030425",
+     "match": 5,
+     "spend": 16862.52,
+     "roas": 2.599785797140641,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120248442931030425_creative.mp4"
+    },
+    {
+     "ad_id": "120248382440530425",
+     "match": 5,
+     "spend": 16511.06,
+     "roas": 2.5762513127564186,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120248382440530425_creative.mp4"
+    },
+    {
+     "ad_id": "120247758944790425",
+     "match": 4,
+     "spend": 180281.64,
+     "roas": 2.20093698947935,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120247758944790425_creative.mp4"
+    }
+   ],
+   "pred_modal": 2.4973740956126687,
+   "lo": 1.9802922896802664,
+   "hi": 3.301238173112166,
+   "naive": 2.98716481389514,
+   "recipe_support": [
+    {
+     "stage": "problem-statement",
+     "angle": "Grey hair & dye damage",
+     "n": 42,
+     "spend": 1475921.62,
+     "tier": "Strong"
+    },
+    {
+     "stage": "hook-line",
+     "angle": "Personal product review opener",
+     "n": 3,
+     "spend": 211669.61,
+     "tier": "Strong"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "angle": "No harsh chemicals in hair dye",
+     "n": 45,
+     "spend": 1752864.1100000003,
+     "tier": "Strong"
+    },
+    {
+     "stage": "use-case-scenario",
+     "angle": "Grey hair coverage",
+     "n": 43,
+     "spend": 1501602.6500000004,
+     "tier": "Strong"
+    },
+    {
+     "stage": "cta-text",
+     "angle": "Comment for link/info",
+     "n": 21,
+     "spend": 767270.94,
+     "tier": "Strong"
+    }
+   ],
+   "calib": {
+    "slope": -0.5697366436097938,
+    "lo": -1.0906376676959688,
+    "hi": -0.13428129938594688,
+    "n": 26
+   }
+  },
+  {
+   "id": "root-touch-up-powder",
+   "name": "Root Touch Up Powder",
+   "ads": 19,
+   "spend": 611752.77,
+   "baseline": 2.4479198516747216,
+   "grid": 24,
+   "bands": [
+    {
+     "label": "Rs10 to 1K",
+     "n": 5,
+     "spread": 0.7455655231247413,
+     "spend": 1180.76
+    },
+    {
+     "label": "Rs1K to 10K",
+     "n": 6,
+     "spread": 0.3928784103816857,
+     "spend": 22214.57
+    },
+    {
+     "label": "Rs10K to 50K",
+     "n": 5,
+     "spread": 0.23265165647091368,
+     "spend": 93166.47
+    },
+    {
+     "label": "Rs50K and above",
+     "n": 3,
+     "spread": 0.05911286177219396,
+     "spend": 495190.97000000003
+    }
+   ],
+   "stages": [
+    {
+     "stage": "problem-statement",
+     "rows": [
+      {
+       "angle": "Grey hair & dye damage",
+       "n": 19,
+       "spend": 611752.77,
+       "raw": 2.4479198516747216,
+       "adj": 2.689643153368155,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 1,
+     "picked": "Grey hair & dye damage",
+     "final": "Grey hair & dye damage"
+    },
+    {
+     "stage": "hook-line",
+     "rows": [
+      {
+       "angle": "Direct grey hair problem",
+       "n": 11,
+       "spend": 65131.63,
+       "raw": 3.1450986256600673,
+       "adj": 2.689643153368154,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Product introduction",
+       "n": 2,
+       "spend": 125145.51000000001,
+       "raw": 2.220933615596756,
+       "adj": 2.6727698151285724,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Skin problem narrative",
+       "n": 2,
+       "spend": 144121.72,
+       "raw": 2.553807503823851,
+       "adj": 2.652880167340985,
+       "tier": "Solid"
+      },
+      {
+       "angle": "Exclamatory/surprise opener",
+       "n": 2,
+       "spend": 22806.25,
+       "raw": 2.9221879967114277,
+       "adj": 2.6159471285720293,
+       "tier": "Some"
+      }
+     ],
+     "total_angles": 4,
+     "picked": "Direct grey hair problem",
+     "final": "Direct grey hair problem"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "rows": [
+      {
+       "angle": "Quick & easy grey coverage",
+       "n": 19,
+       "spend": 611752.77,
+       "raw": 2.4479198516747216,
+       "adj": 2.689643153368155,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 1,
+     "picked": "Quick & easy grey coverage",
+     "final": "Quick & easy grey coverage"
+    },
+    {
+     "stage": "use-case-scenario",
+     "rows": [
+      {
+       "angle": "Emergency/event prep",
+       "n": 8,
+       "spend": 216538.34000000003,
+       "raw": 2.7398342021094275,
+       "adj": 2.689643153368154,
+       "tier": "Strong"
+      },
+      {
+       "angle": "Grey hair coverage",
+       "n": 4,
+       "spend": 39602.92,
+       "raw": 2.905952389369269,
+       "adj": 2.534388072423434,
+       "tier": "Some"
+      },
+      {
+       "angle": "Quick grey root touch-up",
+       "n": 7,
+       "spend": 355611.51,
+       "raw": 2.219158766823942,
+       "adj": 1.9455961185729442,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 3,
+     "picked": "Emergency/event prep",
+     "final": "Emergency/event prep"
+    },
+    {
+     "stage": "cta-text",
+     "rows": [
+      {
+       "angle": "Shop online/now",
+       "n": 5,
+       "spend": 24241.35,
+       "raw": 3.49434499316251,
+       "adj": 2.717002272125166,
+       "tier": "Some"
+      },
+      {
+       "angle": "Comment for link/info",
+       "n": 13,
+       "spend": 468761.35000000003,
+       "raw": 2.461807975422888,
+       "adj": 2.689643153368154,
+       "tier": "Strong"
+      }
+     ],
+     "total_angles": 2,
+     "picked": "Shop online/now",
+     "final": "Shop online/now"
+    }
+   ],
+   "syn_top": [
+    {
+     "sA": "use-case-scenario",
+     "aA": "Emergency/event prep",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 3,
+     "spend": 16000.849999999999,
+     "obs": 4.224110594124688,
+     "exp": 2.9587255738185982,
+     "syn": 1.2653850203060895
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Direct grey hair problem",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 4,
+     "spend": 16177.109999999999,
+     "obs": 4.178086197101955,
+     "exp": 2.9587255738185982,
+     "syn": 1.2193606232833565
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 5,
+     "spend": 24241.35,
+     "obs": 3.49434499316251,
+     "exp": 2.958725573818599,
+     "syn": 0.5356194193439108
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Quick & easy grey coverage",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 5,
+     "spend": 24241.35,
+     "obs": 3.49434499316251,
+     "exp": 2.958725573818599,
+     "syn": 0.5356194193439108
+    }
+   ],
+   "syn_bot": [
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "primary-usp-claim",
+     "aB": "Quick & easy grey coverage",
+     "n": 19,
+     "spend": 611752.77,
+     "obs": 2.4479198516747216,
+     "exp": 2.931366455061588,
+     "syn": -0.4834466033868665
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Quick & easy grey coverage",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 13,
+     "spend": 468761.35000000003,
+     "obs": 2.461807975422888,
+     "exp": 2.931366455061587,
+     "syn": -0.4695584796386991
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "cta-text",
+     "aB": "Comment for link/info",
+     "n": 13,
+     "spend": 468761.35000000003,
+     "obs": 2.461807975422888,
+     "exp": 2.931366455061587,
+     "syn": -0.4695584796386991
+    }
+   ],
+   "steps4": [
+    {
+     "stage": "problem-statement",
+     "solo": "Grey hair & dye damage",
+     "final": "Grey hair & dye damage",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "hook-line",
+     "solo": "Direct grey hair problem",
+     "final": "Direct grey hair problem",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "primary-usp-claim",
+     "solo": "Quick & easy grey coverage",
+     "final": "Quick & easy grey coverage",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "use-case-scenario",
+     "solo": "Emergency/event prep",
+     "final": "Emergency/event prep",
+     "changed": false,
+     "gain": 0.0
+    },
+    {
+     "stage": "cta-text",
+     "solo": "Shop online/now",
+     "final": "Shop online/now",
+     "changed": false,
+     "gain": 0.0
+    }
+   ],
+   "solo_pred": 2.717002272125166,
+   "final_pred": 2.717002272125166,
+   "alts": [
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Shop online/now"
+     ],
+     "pred": 2.717002272125166
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Product introduction",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Shop online/now"
+     ],
+     "pred": 2.69887248907076
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Direct grey hair problem",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Comment for link/info"
+     ],
+     "pred": 2.689643153368154
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Product introduction",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Comment for link/info"
+     ],
+     "pred": 2.6727698151285724
+    },
+    {
+     "recipe": [
+      "Grey hair & dye damage",
+      "Skin problem narrative",
+      "Quick & easy grey coverage",
+      "Emergency/event prep",
+      "Comment for link/info"
+     ],
+     "pred": 2.652880167340985
+    }
+   ],
+   "evidence": [
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "hook-line",
+     "aB": "Direct grey hair problem",
+     "n": 11,
+     "spend": 65131.63,
+     "obs": 3.1450986256600673,
+     "exp": 2.931366455061587,
+     "syn": 0.21373217059848004
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "primary-usp-claim",
+     "aB": "Quick & easy grey coverage",
+     "n": 19,
+     "spend": 611752.77,
+     "obs": 2.4479198516747216,
+     "exp": 2.931366455061588,
+     "syn": -0.4834466033868665
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "use-case-scenario",
+     "aB": "Emergency/event prep",
+     "n": 8,
+     "spend": 216538.34000000003,
+     "obs": 2.7398342021094275,
+     "exp": 2.931366455061587,
+     "syn": -0.1915322529521597
+    },
+    {
+     "sA": "problem-statement",
+     "aA": "Grey hair & dye damage",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 5,
+     "spend": 24241.35,
+     "obs": 3.49434499316251,
+     "exp": 2.958725573818599,
+     "syn": 0.5356194193439108
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Direct grey hair problem",
+     "sB": "primary-usp-claim",
+     "aB": "Quick & easy grey coverage",
+     "n": 11,
+     "spend": 65131.63,
+     "obs": 3.1450986256600673,
+     "exp": 2.931366455061587,
+     "syn": 0.21373217059848004
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Direct grey hair problem",
+     "sB": "use-case-scenario",
+     "aB": "Emergency/event prep",
+     "n": 5,
+     "spend": 37544.009999999995,
+     "obs": 3.3153312605659337,
+     "exp": 2.9313664550615863,
+     "syn": 0.3839648055043474
+    },
+    {
+     "sA": "hook-line",
+     "aA": "Direct grey hair problem",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 4,
+     "spend": 16177.109999999999,
+     "obs": 4.178086197101955,
+     "exp": 2.9587255738185982,
+     "syn": 1.2193606232833565
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Quick & easy grey coverage",
+     "sB": "use-case-scenario",
+     "aB": "Emergency/event prep",
+     "n": 8,
+     "spend": 216538.34000000003,
+     "obs": 2.7398342021094275,
+     "exp": 2.931366455061587,
+     "syn": -0.1915322529521597
+    },
+    {
+     "sA": "primary-usp-claim",
+     "aA": "Quick & easy grey coverage",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 5,
+     "spend": 24241.35,
+     "obs": 3.49434499316251,
+     "exp": 2.958725573818599,
+     "syn": 0.5356194193439108
+    },
+    {
+     "sA": "use-case-scenario",
+     "aA": "Emergency/event prep",
+     "sB": "cta-text",
+     "aB": "Shop online/now",
+     "n": 3,
+     "spend": 16000.849999999999,
+     "obs": 4.224110594124688,
+     "exp": 2.9587255738185982,
+     "syn": 1.2653850203060895
+    }
+   ],
+   "tested": 10,
+   "full_runs": 3,
+   "m4": {
+    "n": 6,
+    "spend": 37720.27,
+    "roas": 3.2998393171628946
+   },
+   "m3": {
+    "n": 15,
+    "spend": 252190.2,
+    "roas": 2.739091368340245
+   },
+   "closest": [
+    {
+     "ad_id": "120249988298040425",
+     "match": 5,
+     "spend": 10921.21,
+     "roas": 5.30958657511393,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120249988298040425_creative.mp4"
+    },
+    {
+     "ad_id": "120250058093800425",
+     "match": 5,
+     "spend": 3232.95,
+     "roas": 1.5450316274609879,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120250058093800425_creative.mp4"
+    },
+    {
+     "ad_id": "120250058093500425",
+     "match": 5,
+     "spend": 1846.69,
+     "roas": 2.494863783309597,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120250058093500425_creative.mp4"
+    },
+    {
+     "ad_id": "120248440792640425",
+     "match": 4,
+     "spend": 21372.89,
+     "roas": 2.6381472042386407,
+     "url": "https://ads-copy.s3.ap-south-1.amazonaws.com/ad_studio/creatives/120248440792640425_creative.mp4"
+    }
+   ],
+   "pred_modal": 2.689643153368155,
+   "lo": 2.0940370538009567,
+   "hi": 3.465397682943345,
+   "naive": 4.483438117582562,
+   "recipe_support": [
+    {
+     "stage": "problem-statement",
+     "angle": "Grey hair & dye damage",
+     "n": 19,
+     "spend": 611752.77,
+     "tier": "Strong"
+    },
+    {
+     "stage": "hook-line",
+     "angle": "Direct grey hair problem",
+     "n": 11,
+     "spend": 65131.63,
+     "tier": "Solid"
+    },
+    {
+     "stage": "primary-usp-claim",
+     "angle": "Quick & easy grey coverage",
+     "n": 19,
+     "spend": 611752.77,
+     "tier": "Strong"
+    },
+    {
+     "stage": "use-case-scenario",
+     "angle": "Emergency/event prep",
+     "n": 8,
+     "spend": 216538.34000000003,
+     "tier": "Strong"
+    },
+    {
+     "stage": "cta-text",
+     "angle": "Shop online/now",
+     "n": 5,
+     "spend": 24241.35,
+     "tier": "Some"
+    }
+   ],
+   "calib": {
+    "slope": 0.7746939061360917,
+    "lo": -0.48953910171898946,
+    "hi": 1.2037133295945446,
+    "n": 8
+   }
+  }
+ ]
+}

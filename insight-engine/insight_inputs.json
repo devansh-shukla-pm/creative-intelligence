@@ -1,0 +1,561 @@
+{
+  "_readme": "Everything in here is already computed. Do not calculate, round, convert or re-derive any number. Quote only the *_display strings, exactly as written. Run only the judgment checks listed in needs_judgment, then write.",
+  "dataset": {
+    "ads_with_spend": "257",
+    "total_spend": "₹94.1L",
+    "account_return_per_rupee": "₹2.66",
+    "account_return_meaning": "For every ₹1 spent across the whole account, this many rupees came back.",
+    "spend_floor_applied": "₹28,226",
+    "currency": "₹"
+  },
+  "product_profiles": {
+    "Root Touch Up Powder": {
+      "what_it_is": "an instant powder that covers grey roots between colourings",
+      "serves_area": [
+        "hair"
+      ],
+      "serves_concerns": [
+        "grey-hair",
+        "hair-colouring"
+      ]
+    },
+    "Hair Colour / Hair Dye": {
+      "what_it_is": "a hair colour that covers grey hair",
+      "serves_area": [
+        "hair"
+      ],
+      "serves_concerns": [
+        "grey-hair",
+        "hair-colouring"
+      ]
+    }
+  },
+  "suggested_order": [
+    "do_1",
+    "funnel_leak_2",
+    "product_split_3",
+    "chemistry_4"
+  ],
+  "reserve_order": [
+    "funnel_leak_5",
+    "do_6",
+    "quiet_converter_7",
+    "chemistry_8",
+    "chemistry_9"
+  ],
+  "candidates": [
+    {
+      "type": "do",
+      "fixed_slot": 1,
+      "score": 232.9,
+      "stage_key": "hook-line",
+      "stage_plain": "the opening hook",
+      "angle_text": "Personal transformation claim",
+      "display": {
+        "n_ads": "9",
+        "return_per_rupee": "₹3.35",
+        "account_return_per_rupee": "₹2.66",
+        "better_than_account": "26%",
+        "budget_share": "1%",
+        "spend": "₹97,791",
+        "other_qualifying_choices": "1"
+      },
+      "evidence": {
+        "n_ads": 9,
+        "spend": 97791,
+        "roas": 3.348,
+        "spend_share_pct": 1.04,
+        "widened": false
+      },
+      "choice_keys": [
+        "hook-line|Personal transformation claim"
+      ],
+      "ad_ids": [
+        "120249177560540425",
+        "120245034094810425",
+        "120246720526380425",
+        "120241813144480425",
+        "120249489143210425",
+        "120245627503080425",
+        "120248145679970425",
+        "120245627741150425",
+        "120245377309560425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "tier": 1,
+      "id": "do_1"
+    },
+    {
+      "type": "funnel_leak",
+      "fixed_slot": 2,
+      "score": 535,
+      "case": "people_click_but_do_not_add_to_cart",
+      "stage_key": "hook-line",
+      "stage_plain": "the opening hook",
+      "angle_text": "Proof of results hook",
+      "display": {
+        "n_ads": "7",
+        "spend": "₹5.4L",
+        "budget_share": "6%",
+        "return_per_rupee": "₹2.23",
+        "account_return_per_rupee": "₹2.66",
+        "clicks_vs_account": "10% more people click through than average",
+        "cart_vs_account": "19% fewer people add to cart than average",
+        "buy_vs_account": "31% fewer people go on to buy than average"
+      },
+      "evidence": {
+        "n_ads": 7,
+        "spend": 535015,
+        "roas": 2.226,
+        "lpv_ratio": 1.099,
+        "atc_ratio": 0.81,
+        "conv_ratio": 0.69
+      },
+      "leak_step_plain": "add to cart",
+      "action_hint": "Test a clearer product page for these ads, one that shows the product, its benefit and the price sooner, and keep the opening.",
+      "choice_keys": [
+        "hook-line|Proof of results hook"
+      ],
+      "ad_ids": [
+        "120247361748360425",
+        "120249092542540425",
+        "120247758944790425",
+        "120241834139830425",
+        "120247893111670425",
+        "120248619233890425",
+        "120249959075110425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "tier": 1,
+      "id": "funnel_leak_2"
+    },
+    {
+      "type": "product_split",
+      "case": "budget_mismatch",
+      "score": 368,
+      "stage_key": "hook-line",
+      "stage_plain": "the opening hook",
+      "angle_text": "Direct grey hair problem",
+      "display": {
+        "better_product": "Root Touch Up Powder",
+        "better_product_return_per_rupee": "₹3.14",
+        "better_product_n_ads": "12",
+        "better_product_spend": "₹65,141",
+        "weaker_product": "Hair Colour / Hair Dye",
+        "weaker_product_return_per_rupee": "₹2.41",
+        "weaker_product_n_ads": "17",
+        "weaker_product_spend": "₹4.1L",
+        "weaker_product_own_average_return_per_rupee": "₹2.46",
+        "weaker_gets_times_the_budget": "about 6 times"
+      },
+      "evidence": {
+        "hi_roas": 3.145,
+        "lo_roas": 2.407,
+        "hi_spend": 65141,
+        "lo_spend": 409013,
+        "hi_n": 12,
+        "lo_n": 17
+      },
+      "choice_keys": [
+        "hook-line|Direct grey hair problem"
+      ],
+      "products_involved": [
+        "root-touch-up-powder",
+        "hair-colour-dye"
+      ],
+      "ad_ids": [
+        "120249988298040425",
+        "120248441374130425",
+        "120244024570570425",
+        "120249093162220425",
+        "120248440792640425",
+        "120250058093500425",
+        "120246004793270425",
+        "120250058093800425",
+        "120249092835920425",
+        "120248440509950425",
+        "120248441146520425",
+        "120245576949050425",
+        "120249988264930425",
+        "120248641048830425",
+        "120249489143200425",
+        "120249988168910425",
+        "120248641048840425",
+        "120248380311320425",
+        "120249988184620425",
+        "120245376963580425",
+        "120245377033560425",
+        "120248228338530425",
+        "120246720551130425",
+        "120248641153200425",
+        "120249770470640425",
+        "120249903218340425",
+        "120245291494270425",
+        "120245291880410425",
+        "120246682317690425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter",
+        "product_logic: would a marketer already expect this choice to suit one of the two products better than the other? If the difference is plainly explained by what the products are, drop it."
+      ],
+      "tier": 1,
+      "rank_among_rest": 2,
+      "id": "product_split_3"
+    },
+    {
+      "type": "chemistry",
+      "score": 205,
+      "part_a": {
+        "stage_key": "use-case-scenario",
+        "stage_plain": "the context it is shown in",
+        "angle_text": "Nighttime skincare & repair"
+      },
+      "part_b": {
+        "stage_key": "proof-points",
+        "stage_plain": "the proof it cites",
+        "angle_text": "Shark Tank / TV endorsement"
+      },
+      "display": {
+        "n_ads": "5",
+        "pair_return_per_rupee": "₹3.88",
+        "part_a_alone_return_per_rupee": "₹2.76",
+        "part_b_alone_return_per_rupee": "₹2.51",
+        "better_than_stronger_part": "41%",
+        "spend": "₹91,076"
+      },
+      "evidence": {
+        "n_ads": 5,
+        "spend": 91076,
+        "pair_roas": 3.884,
+        "solo_a": 2.756,
+        "solo_b": 2.513,
+        "widened": false
+      },
+      "ad_ids": [
+        "120248619233880425",
+        "120248619217890425",
+        "120247361345680425",
+        "120248619394700425",
+        "120248145679980425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "choice_keys": [
+        "use-case-scenario|Nighttime skincare & repair",
+        "proof-points|Shark Tank / TV endorsement"
+      ],
+      "tier": 1,
+      "rank_among_rest": 3,
+      "id": "chemistry_4"
+    },
+    {
+      "type": "funnel_leak",
+      "score": 435.2,
+      "case": "people_click_but_do_not_add_to_cart",
+      "stage_key": "testimonial-claim",
+      "stage_plain": "the testimonial it uses",
+      "angle_text": "Grey coverage & hair shine results",
+      "display": {
+        "n_ads": "4",
+        "spend": "₹4.4L",
+        "budget_share": "5%",
+        "return_per_rupee": "₹2.23",
+        "account_return_per_rupee": "₹2.66",
+        "clicks_vs_account": "11% more people click through than average",
+        "cart_vs_account": "18% fewer people add to cart than average",
+        "buy_vs_account": "26% fewer people go on to buy than average"
+      },
+      "evidence": {
+        "n_ads": 4,
+        "spend": 435212,
+        "roas": 2.228,
+        "lpv_ratio": 1.111,
+        "atc_ratio": 0.823,
+        "conv_ratio": 0.738
+      },
+      "leak_step_plain": "add to cart",
+      "action_hint": "Test a clearer product page for these ads, one that shows the product, its benefit and the price sooner, and keep the opening.",
+      "choice_keys": [
+        "testimonial-claim|Grey coverage & hair shine results"
+      ],
+      "ad_ids": [
+        "120249092542540425",
+        "120247758944790425",
+        "120246291990640425",
+        "120247759143630425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "tier": 1,
+      "rank_among_rest": 1,
+      "id": "funnel_leak_5"
+    },
+    {
+      "type": "do",
+      "score": 172.3,
+      "stage_key": "primary-usp-claim",
+      "stage_plain": "the core claim it's proving",
+      "angle_text": "Skincare routine approach",
+      "display": {
+        "n_ads": "8",
+        "return_per_rupee": "₹3.23",
+        "account_return_per_rupee": "₹2.66",
+        "better_than_account": "22%",
+        "budget_share": "0.6%",
+        "spend": "₹57,740",
+        "other_qualifying_choices": "1"
+      },
+      "evidence": {
+        "n_ads": 8,
+        "spend": 57740,
+        "roas": 3.233,
+        "spend_share_pct": 0.61,
+        "widened": false
+      },
+      "choice_keys": [
+        "primary-usp-claim|Skincare routine approach"
+      ],
+      "ad_ids": [
+        "120249177560540425",
+        "120249958548890425",
+        "120246003677830425",
+        "120245230737970425",
+        "120247893111690425",
+        "120248145356610425",
+        "120245377309560425",
+        "120246638790050425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "tier": 1,
+      "rank_among_rest": 4,
+      "id": "do_6"
+    },
+    {
+      "type": "quiet_converter",
+      "score": 604.2,
+      "stage_key": "hook-line",
+      "stage_plain": "the opening hook",
+      "angle_text": "Authenticity of Ayurveda",
+      "display": {
+        "n_ads": "14",
+        "spend": "₹4.6L",
+        "budget_share": "5%",
+        "return_per_rupee": "₹3.23",
+        "account_return_per_rupee": "₹2.66",
+        "clicks_vs_account": "15% fewer people click through than average",
+        "buy_vs_account": "43% more people go on to buy than average"
+      },
+      "evidence": {
+        "n_ads": 14,
+        "spend": 460569,
+        "roas": 3.23,
+        "lpv_ratio": 0.85,
+        "conv_ratio": 1.432
+      },
+      "action_hint": "Keep these ads running and judge them on sales, not clicks. Test a more eye-catching opening that keeps the same claim.",
+      "choice_keys": [
+        "hook-line|Authenticity of Ayurveda"
+      ],
+      "ad_ids": [
+        "120241899961370425",
+        "120243798372410425",
+        "120248228128080425",
+        "120248228128090425",
+        "120241834139810425",
+        "120241634683480425",
+        "120243798372450425",
+        "120241813383200425",
+        "120243798372470425",
+        "120244832845870425",
+        "120244181146450425",
+        "120248228128160425",
+        "120247582691660425",
+        "120241757527410425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "tier": 2,
+      "rank_among_rest": 5,
+      "id": "quiet_converter_7"
+    },
+    {
+      "type": "chemistry",
+      "score": 175,
+      "part_a": {
+        "stage_key": "use-case-scenario",
+        "stage_plain": "the context it is shown in",
+        "angle_text": "Nighttime skincare & repair"
+      },
+      "part_b": {
+        "stage_key": "testimonial-claim",
+        "stage_plain": "the testimonial it uses",
+        "angle_text": "Product quality & performance"
+      },
+      "display": {
+        "n_ads": "5",
+        "pair_return_per_rupee": "₹3.86",
+        "part_a_alone_return_per_rupee": "₹2.76",
+        "part_b_alone_return_per_rupee": "₹2.86",
+        "better_than_stronger_part": "35%",
+        "spend": "₹91,562"
+      },
+      "evidence": {
+        "n_ads": 5,
+        "spend": 91562,
+        "pair_roas": 3.864,
+        "solo_a": 2.756,
+        "solo_b": 2.864,
+        "widened": false
+      },
+      "ad_ids": [
+        "120248619233880425",
+        "120248619217890425",
+        "120247361345680425",
+        "120248619394700425",
+        "120248145680000425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "choice_keys": [
+        "use-case-scenario|Nighttime skincare & repair",
+        "testimonial-claim|Product quality & performance"
+      ],
+      "tier": 1,
+      "use_only_if_dropped": [
+        "chemistry_4"
+      ],
+      "id": "chemistry_8"
+    },
+    {
+      "type": "chemistry",
+      "score": 168,
+      "part_a": {
+        "stage_key": "hook-line",
+        "stage_plain": "the opening hook",
+        "angle_text": "Direct grey hair problem"
+      },
+      "part_b": {
+        "stage_key": "use-case-scenario",
+        "stage_plain": "the context it is shown in",
+        "angle_text": "Emergency/event prep"
+      },
+      "display": {
+        "n_ads": "6",
+        "pair_return_per_rupee": "₹3.40",
+        "part_a_alone_return_per_rupee": "₹2.52",
+        "part_b_alone_return_per_rupee": "₹2.65",
+        "better_than_stronger_part": "28%",
+        "spend": "₹39,139"
+      },
+      "evidence": {
+        "n_ads": 6,
+        "spend": 39139,
+        "pair_roas": 3.399,
+        "solo_a": 2.515,
+        "solo_b": 2.649,
+        "widened": false
+      },
+      "ad_ids": [
+        "120245577201940425",
+        "120249988298040425",
+        "120249093162220425",
+        "120248440792640425",
+        "120250058093500425",
+        "120250058093800425"
+      ],
+      "needs_judgment": [
+        "obviousness_filter"
+      ],
+      "choice_keys": [
+        "hook-line|Direct grey hair problem",
+        "use-case-scenario|Emergency/event prep"
+      ],
+      "tier": 1,
+      "use_only_if_dropped": [
+        "product_split_3"
+      ],
+      "id": "chemistry_9"
+    }
+  ],
+  "unavailable_types": [
+    {
+      "type": "stop",
+      "reason": "Big-spend creative choices show no fatigue, no broken step and no drag."
+    },
+    {
+      "type": "whitespace",
+      "reason": "No proven creative choice is untested on a sibling product in the same category."
+    },
+    {
+      "type": "portfolio_truth",
+      "reason": "Top pooled patterns give a mixed picture across products, so no clear confirm or debunk."
+    },
+    {
+      "type": "approach_alignment",
+      "reason": "Excluded by rule: broad pitch styles (lead with product, offer, brand) are things a marketer already knows. Never write about them."
+    },
+    {
+      "type": "underused_stage",
+      "reason": "No rarely-used part of an ad clearly beats the account average."
+    },
+    {
+      "type": "clash",
+      "reason": "No two creative choices do clearly worse together than the weaker one does alone."
+    }
+  ],
+  "rejected_by_guardrail": [
+    {
+      "type": "do",
+      "guardrail": "G2 spend floor",
+      "label": "Hook Line: Daily routine vibes",
+      "n_ads": 5,
+      "spend_display": "₹15,279",
+      "floor_display": "₹28,226",
+      "note": "Cleared the ratio bars but total spend is below the absolute floor. Do not use."
+    },
+    {
+      "type": "whitespace",
+      "guardrail": "G7 semantic mismatch",
+      "label": "Hook Line: Direct grey hair problem",
+      "from_product": "Root Touch Up Powder",
+      "to_product": "Hair Oil",
+      "note": "This creative choice speaks to something Hair Oil (an oil for hair health and growth) does not address. Never suggest it for that product."
+    },
+    {
+      "type": "product_split",
+      "guardrail": "G7 semantic mismatch",
+      "label": "Problem Statement: Dry skin & ineffective products",
+      "product": "Lip Balm",
+      "note": "This creative choice speaks to something Lip Balm does not address, so it is never compared on that product."
+    },
+    {
+      "type": "product_split",
+      "guardrail": "G7 semantic mismatch",
+      "label": "Primary USP Claim: Skin brightening & tan removal",
+      "product": "Night Repair Cream",
+      "note": "This creative choice speaks to something Night Repair Cream does not address, so it is never compared on that product."
+    },
+    {
+      "type": "product_split",
+      "guardrail": "G7 semantic mismatch",
+      "label": "Use Case Scenario: Daily skincare & wellness",
+      "product": "Lip Balm",
+      "note": "This creative choice speaks to something Lip Balm does not address, so it is never compared on that product."
+    }
+  ],
+  "_meta": {
+    "slots_target": 4,
+    "slots_possible": 4,
+    "generated_by": "build_insight_inputs.js"
+  }
+}
