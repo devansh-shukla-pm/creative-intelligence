@@ -17,7 +17,7 @@ Open the demo right now: `open app/creative-intelligence.html` (thumbnails sit n
 
 ```
 Browser ──► Vercel (api/*.js): Meta login, accounts, create report, status, data, thumbnails
-                │ reads and writes                  │ starts (repository_dispatch)
+                │ reads and writes                  │ starts (workflow_dispatch)
                 ▼                                   ▼
           Neon Postgres  ◄──────────────  GitHub Actions worker (Python + Node, no time limit)
           users, sessions, reports,         1. pull ads + insights from Meta              → Signal A

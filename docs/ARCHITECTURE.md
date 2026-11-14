@@ -8,7 +8,7 @@ Browser (static app)
    v
 Vercel  --  api/*.js (thin Node functions: auth, accounts, report create/status/boot, thumbnails)
    |                                  \
-   | reads/writes                      \ dispatches (repository_dispatch)
+   | reads/writes                      \ dispatches (workflow_dispatch)
    v                                    v
 Neon Postgres  <------------------  GitHub Actions "worker" (Python + Node, no time limits)
  users, sessions, reports,             1. pull ads + insights from Meta

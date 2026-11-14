@@ -1,6 +1,6 @@
 name: report-worker
 
-# Started by the API (repository_dispatch) when a user generates a report. Runs the whole pipeline for one report.
+# Started by the API (workflow_dispatch) when a user generates a report. Runs the whole pipeline for one report.
 on:
   repository_dispatch:
     types: [run-report]
