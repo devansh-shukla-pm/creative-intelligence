@@ -76,7 +76,7 @@ def cmt_ads(ads, limit=500):
     return rows
 
 # ---------- DATA ----------
-def build_data(ads, classified):
+def build_data(ads, classified, prev=None):
     """classified: {ad_id: {extraction, labels, product}}. Unclassified ads stay in the data (so totals are stable)."""
     sku_names = OrderedDict()
     out_ads = []
@@ -114,7 +114,8 @@ def build_data(ads, classified):
         "meta": {"source": "Meta Marketing API", "total_ads": len(out_ads),
                  "sku_coverage_note": f"{n_single} of {len(out_ads)} ads mapped to a single clean SKU; {n_multi} flagged multi-SKU/bundle; {len(out_ads) - n_single - n_multi} unclassified.",
                  "campaign_coverage_note": f"{n_camp} of {len(out_ads)} ads carry a campaign.",
-                 "partnership_proxy_note": 'No Partnership Ad field is pulled. "Partnership / Non-Partnership" is approximated from creator_presence (a person on camera vs none).'},
+                 "partnership_proxy_note": 'No Partnership Ad field is pulled. "Partnership / Non-Partnership" is approximated from creator_presence (a person on camera vs none).',
+                 "prev": prev},
         "stage_defs": STAGE_DEFS,
         "skus": [{"id": k, "name": v} for k, v in sku_names.items()],
         "ads": out_ads,

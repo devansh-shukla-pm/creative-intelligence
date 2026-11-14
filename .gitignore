@@ -8,3 +8,6 @@ __pycache__/
 .data/
 .venv/
 .env.local
+.vercel
+.env*
+.env*.local

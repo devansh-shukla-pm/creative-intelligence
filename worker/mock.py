@@ -43,6 +43,9 @@ class MockSource:
         if on_progress: on_progress(f"Pulled {len(ads)} ads from Meta (mock)")
         return ads
 
+    def period_totals(self, rep, since, until):
+        return None
+
     def video_urls(self, ads):
         return {a["ad_id"]: a["creative"]["preview_link"] for a in ads if a["creative"].get("video_id")}
 

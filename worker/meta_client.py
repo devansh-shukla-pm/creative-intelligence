@@ -126,6 +126,17 @@ def _async_insights(token, account_id, params):
         raise MetaError("Async insights job timed out")
     return _paged(f"/{rid}/insights", {"limit": 500}, token)
 
+def pull_period_totals(token, account_id, since, until):
+    """Totals for a period (ads with spend, spend, revenue, roas): used for the trend on the summary cards."""
+    rows = _paged(f"/act_{account_id}/insights", {
+        "level": "ad", "fields": "ad_id,spend,actions,action_values", "limit": 500,
+        "time_range": json.dumps({"since": since, "until": until}),
+        "filtering": json.dumps([{"field": "spend", "operator": "GREATER_THAN", "value": "0"}]),
+    }, token)
+    spend = sum(_f(r.get("spend")) for r in rows)
+    revenue = sum(_action(r.get("action_values"), PURCHASE) for r in rows)
+    return {"from": since, "to": until, "ads": len(rows), "spend": spend, "revenue": revenue, "roas": (revenue / spend) if spend > 0 else 0.0}
+
 def _chunks(seq, n):
     for i in range(0, len(seq), n): yield seq[i:i + n]
 

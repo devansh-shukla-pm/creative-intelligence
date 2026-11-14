@@ -42,6 +42,17 @@ Neon Postgres  <------------------  GitHub Actions "worker" (Python + Node, no t
 
 The worker sets each signal as soon as its piece is ready, then the browser (polling every few seconds) loads only the payloads it does not have yet.
 
+## The app pages
+
+`app/src/app.template.html` is the single source of the UI. `scripts/build_app.py` builds two pages from it:
+
+- `app/report.html` (live): no data inside. A blocking script loads `/api/report/boot?id=...` (the user's own report, checked by session), then the page polls the same endpoint every 3 seconds until all four signals are in. Only the pieces the browser does not have yet are sent.
+- `app/creative-intelligence.html` (demo): the demo account's datasets are embedded. It simulates the same four signals with timers. Used for the Claude artifact and for viewing without a server.
+
+`app/index.html` is the landing page: Connect Meta, choose an ad account and a date range, Generate Creative Intel, and a list of recent reports.
+
+The hosted site never contains demo data (`.vercelignore` plus a test).
+
 ## Reports and caching
 
 - A report is `(user, ad account, date range)`. Asking again for the same range within 6 hours returns the existing report.

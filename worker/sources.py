@@ -35,6 +35,12 @@ class MetaSource:
             })
         return ads
 
+    def period_totals(self, rep, since, until):
+        try:
+            return mc.pull_period_totals(self.token, rep.account_id, since, until)
+        except mc.MetaError:
+            return None                      # the trend is optional: never fail the report over it
+
     def video_urls(self, ads):
         """ad_id -> fresh video url, only for the ads that need extraction."""
         by_video = {a["creative"]["video_id"]: a["ad_id"] for a in ads if a["creative"].get("video_id")}

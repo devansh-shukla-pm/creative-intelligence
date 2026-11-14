@@ -4,7 +4,7 @@ Runs the whole pipeline for one report, setting each signal as soon as its piece
 Safe to re-run: every step reads the caches first.
 """
 from __future__ import annotations
-import argparse, sys, traceback, concurrent.futures as cf
+import argparse, datetime, sys, traceback, concurrent.futures as cf
 from . import config, db, cache
 from .report import Report, ReportError
 from .llm import get_llm
@@ -12,11 +12,19 @@ from .sources import get_source
 from . import extract, cluster, naming, assemble, insights
 from .lab.model import compute_lab, eligible_products
 
+def previous_period(rep):
+    """The period of equal length right before the report's range."""
+    a = datetime.date.fromisoformat(rep.date_from); b = datetime.date.fromisoformat(rep.date_to)
+    n = (b - a).days + 1
+    pb = a - datetime.timedelta(days=1)
+    return (pb - datetime.timedelta(days=n - 1)).isoformat(), pb.isoformat()
+
 def stage_a(rep, source):
     rep.progress("pulling", "Pulling your ads from Meta")
     ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
     if not ads:
         raise ReportError("No ads with spend were found for this account and date range.")
+    prev = source.period_totals(rep, *previous_period(rep))
     conn = rep.conn
     for a in ads:
         cache.save_creative(conn, rep.account_id, a["ad_id"], {**a["creative"], "ad_name": a["ad_name"],
@@ -32,11 +40,11 @@ def stage_a(rep, source):
     cache.save_report_ads(conn, rep.id, ads)
     db.upsert_payload(conn, rep.id, "audit", assemble.audit_rows(ads))
     db.upsert_payload(conn, rep.id, "cmt_ads", assemble.cmt_ads(ads))
-    db.upsert_payload(conn, rep.id, "data", assemble.build_data(ads, {}))      # metrics only until classification is done
+    db.upsert_payload(conn, rep.id, "data", assemble.build_data(ads, {}, prev))   # metrics only until classification is done
     rep.signal("a")
-    return ads
+    return ads, prev
 
-def stage_b(rep, source, llm, ads):
+def stage_b(rep, source, llm, ads, prev=None):
     conn = rep.conn
     ids = [a["ad_id"] for a in ads]
     cached = cache.load_cache(conn, rep.account_id, ids)
@@ -59,7 +67,7 @@ def stage_b(rep, source, llm, ads):
     rep.progress("assembling", "Putting your report together")
     classified = {i: {"extraction": cached[i].get("extraction"), "labels": cached[i].get("cluster_labels"), "product": cached[i].get("product")}
                   for i in ids if cached.get(i) and cached[i].get("extraction")}
-    data = assemble.build_data(ads, classified)
+    data = assemble.build_data(ads, classified, prev)
     db.upsert_payload(conn, rep.id, "cmt_dims", assemble.build_cmt_dims(ads, classified))
     db.upsert_payload(conn, rep.id, "data", data)
     rep.signal("b")
@@ -85,8 +93,8 @@ def run(report_id):
     rep.start()
     try:
         llm = get_llm(); source = get_source(rep)
-        ads = stage_a(rep, source)
-        data = stage_b(rep, source, llm, ads)
+        ads, prev = stage_a(rep, source)
+        data = stage_b(rep, source, llm, ads, prev)
         # insights and the Lab are independent: run them side by side
         with cf.ThreadPoolExecutor(max_workers=2) as pool:
             fc = pool.submit(lambda: _own_conn(report_id, "c", llm, data))
