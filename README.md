@@ -126,6 +126,7 @@ api/        Vercel functions: Meta login, accounts, report create / status / boo
 lib/        Shared server code: config, Postgres, crypto, sessions, Meta, report logic, worker dispatch
 db/         schema.sql (Postgres, idempotent)
 worker/     Python worker (runs as a GitHub Actions job): Meta pull, prompts, caching, insights, Lab
+.github/    report-worker.yml (runs the pipeline for one report), test.yml (CI)
 dev/        Local dev server and a throwaway local Postgres
 tests/      API tests (node --test) against a real local Postgres
 ```
@@ -133,8 +134,9 @@ tests/      API tests (node --test) against a real local Postgres
 Run the API tests (needs the Python venv for the local Postgres):
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r worker/requirements.txt
-npm install && npm test
+python3 -m venv .venv && .venv/bin/pip install -r worker/requirements-dev.txt
+npm install && npm test                       # API tests
+.venv/bin/python -m pytest worker/tests       # worker tests (about 3 minutes)
 ```
 
 ## Build log
@@ -142,3 +144,4 @@ npm install && npm test
 Every commit that changes behaviour adds a line here.
 
 - **API foundation.** Postgres schema, Meta login (with a mock mode for local dev), encrypted token storage, sessions, report create / status / boot endpoints, owner-only thumbnails, local dev server, 7 API tests, architecture doc.
+- **Worker.** The full pipeline for one report: Meta pull with retries and an async fallback, creative thumbnails stored in Postgres, extraction prompt (video, carousel, image, thumbnail fallback) with per-ad cache, clustering prompt with cluster memory, product naming (new prompt, `prompts/product_naming_prompt.md`), dataset assembly (ads, explorer rows, Story Matrix aggregates), insight pack plus insight prompt plus verification, and the Experimentation Lab as a callable module that reproduces the validated numbers exactly. Offline mock mode replays the demo account through the real pipeline. Second report on the same account sends nothing to the LLMs. GitHub Actions workflows for the worker and for CI. Setup guide in `docs/SETUP.md`. 13 unit tests, 2 pipeline tests and 4 Lab tests on the worker side; 9 API tests.

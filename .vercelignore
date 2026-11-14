@@ -1,0 +1,14 @@
+# The live deployment never serves demo data or local tooling
+app/thumbs
+app/cre-thumbs
+app/cmt-thumbs
+app/shesha-thumbs
+app/shesha-sprite-1.jpg
+app/creative-intelligence.html
+source-data
+experimentation-lab
+worker
+docs
+prd
+.venv
+.data

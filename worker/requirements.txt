@@ -1,0 +1,10 @@
+# Worker (Python 3.9+). Runs in GitHub Actions; also runnable locally.
+psycopg[binary]>=3.1
+requests>=2.31
+cryptography>=42
+pillow>=10
+numpy
+pandas
+scipy
+scikit-learn
+catboost

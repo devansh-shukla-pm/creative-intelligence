@@ -5,8 +5,11 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 // A throwaway Postgres for the test run.
-const py = '.venv/bin/python';
-const pgProc = spawn(py, ['dev/pg.py'], { stdio: ['ignore', 'pipe', 'inherit'] });
+const py = process.env.PYTHON || '.venv/bin/python';
+import os from 'node:os';
+import path from 'node:path';
+const pgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ci-api-pg-'));
+const pgProc = spawn(py, ['dev/pg.py', pgDir], { stdio: ['ignore', 'pipe', 'inherit'] });
 const uri = await new Promise(res => pgProc.stdout.once('data', d => res(String(d).trim())));
 
 process.env.DATABASE_URL = uri;
@@ -95,4 +98,22 @@ test('tokens are encrypted at rest', async () => {
   assert.equal(verify(sign('abc', 60)), 'abc');
   assert.equal(verify(sign('abc', 60) + 'x'), null);
   assert.equal(verify(sign('abc', -5)), null);
+});
+
+test('a report whose worker went silent is marked failed', async () => {
+  const post = body => c('/api/report/create', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  await q(`UPDATE reports SET status='done'`);       // earlier tests left reports queued; the per-user running limit would block this one
+  const { id } = await (await post({ account_id: '1000000000001', date_from: '2026-06-01', date_to: '2026-06-30', force: true })).json();
+  await q(`UPDATE reports SET status='running', heartbeat_at = now() - interval '30 minutes' WHERE id=$1`, [id]);
+  const st = await (await c(`/api/report/status?id=${id}`)).json();
+  assert.equal(st.status, 'failed'); assert.match(st.error, /stopped responding/);
+});
+
+test('running-report limit protects LLM spend', async () => {
+  const post = body => c('/api/report/create', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  await q(`UPDATE reports SET status='done'`);
+  const mk = (a, b) => post({ account_id: '1000000000001', date_from: a, date_to: b, force: true });
+  assert.equal((await mk('2026-01-01', '2026-01-31')).status, 200);
+  assert.equal((await mk('2026-02-01', '2026-02-28')).status, 200);
+  assert.equal((await mk('2026-03-01', '2026-03-31')).status, 429);
 });

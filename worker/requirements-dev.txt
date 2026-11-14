@@ -1,0 +1,4 @@
+-r requirements.txt
+# local development and tests only
+pytest
+pgserver

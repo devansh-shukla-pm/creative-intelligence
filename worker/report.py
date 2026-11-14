@@ -1,0 +1,52 @@
+"""The report being processed: loads it, reports progress, sets signals."""
+from __future__ import annotations
+from dataclasses import dataclass
+from . import db
+
+class ReportError(Exception):
+    """A failure the user should see (shown in the report's error state)."""
+
+@dataclass
+class Report:
+    conn: object
+    id: str
+    user_id: str
+    account_id: str
+    account_name: str
+    currency: str
+    date_from: str
+    date_to: str
+
+    @classmethod
+    def load(cls, conn, report_id):
+        r = db.one(conn, """SELECT id::text, user_id, account_id, account_name, currency,
+                                   to_char(date_from,'YYYY-MM-DD') AS date_from, to_char(date_to,'YYYY-MM-DD') AS date_to
+                              FROM reports WHERE id = %s""", (report_id,))
+        if not r:
+            raise ReportError(f"Report {report_id} not found")
+        return cls(conn, **r)
+
+    def start(self):
+        self.conn.execute("UPDATE reports SET status='running', error=NULL, heartbeat_at=now(), updated_at=now() WHERE id=%s", (self.id,))
+
+    def progress(self, stage, message, done=None, total=None):
+        p = {"message": message}
+        if done is not None: p["done"] = done
+        if total is not None: p["total"] = total
+        self.conn.execute(
+            "UPDATE reports SET stage=%s, progress=%s, heartbeat_at=now(), updated_at=now() WHERE id=%s",
+            (stage, db.J(p), self.id))
+
+    def signal(self, letter):
+        assert letter in "abcd"
+        self.conn.execute(f"UPDATE reports SET signal_{letter}=now(), updated_at=now() WHERE id=%s", (self.id,))
+
+    def finish(self):
+        self.conn.execute("UPDATE reports SET status='done', stage=NULL, progress='{}'::jsonb, updated_at=now() WHERE id=%s", (self.id,))
+
+    def fail(self, message):
+        self.conn.execute("UPDATE reports SET status='failed', error=%s, updated_at=now() WHERE id=%s", (message[:500], self.id))
+
+    def user_token_blob(self):
+        r = db.one(self.conn, "SELECT token_enc FROM users WHERE id=%s", (self.user_id,))
+        return r["token_enc"] if r else None
