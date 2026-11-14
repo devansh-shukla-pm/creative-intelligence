@@ -10,7 +10,7 @@ The app is one self-contained HTML file with three tabs:
 | **Insights & Actionables** | Four insight cards, creative ranking engine, recipe suggestion, winning and losing angles, 2D heatmap, 3D combination lab. |
 | **Experimentation Lab** | Pick a product, click one button, get a creative recipe with a predicted ROAS and a full six-step walkthrough. |
 
-Status: front-end prototype. All data is embedded in the HTML. In production every calculation runs in the backend and the front end only displays results (see the PRDs).
+Status: the front-end prototype (static demo data) works today. A live version is being built that logs in with Meta, pulls real ad data, runs the two prompts, and fills every view. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and the build log at the end of this file.
 
 ## Run it
 
@@ -118,3 +118,27 @@ Methodology in plain words: `docs/Experimentation_Lab_explained.md` and `docs/Ex
 - Plain written copy, no em dashes in deliverables.
 - INR shown with L and Cr (for example Rs38.65L). ROAS to two decimals with an x.
 - Use "angle" in the UI, never "cluster".
+
+## Live app (in progress)
+
+```
+api/        Vercel functions: Meta login, accounts, report create / status / boot, thumbnails
+lib/        Shared server code: config, Postgres, crypto, sessions, Meta, report logic, worker dispatch
+db/         schema.sql (Postgres, idempotent)
+worker/     Python worker (runs as a GitHub Actions job): Meta pull, prompts, caching, insights, Lab
+dev/        Local dev server and a throwaway local Postgres
+tests/      API tests (node --test) against a real local Postgres
+```
+
+Run the API tests (needs the Python venv for the local Postgres):
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r worker/requirements.txt
+npm install && npm test
+```
+
+## Build log
+
+Every commit that changes behaviour adds a line here.
+
+- **API foundation.** Postgres schema, Meta login (with a mock mode for local dev), encrypted token storage, sessions, report create / status / boot endpoints, owner-only thumbnails, local dev server, 7 API tests, architecture doc.
