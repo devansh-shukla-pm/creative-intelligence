@@ -12,3 +12,9 @@ docs
 prd
 .venv
 .data
+scripts
+dev
+tests
+insight-engine
+prompts
+.github
