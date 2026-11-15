@@ -112,7 +112,7 @@
 
   .content{padding:2px 32px 64px;display:flex;flex-direction:column;gap:var(--sp-7);max-width:1320px;width:100%;margin:0 auto;}
 
-  .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
   .page-head h1{font-size:21px;font-weight:700;margin:0 0 4px;letter-spacing:-.2px;}
   .page-head p{margin:0;font-size:13px;color:var(--color-text-muted);}
 
@@ -359,7 +359,8 @@
 
   /* ================= locked / loading state ================= */
   .load-banner{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--color-text-secondary);background:var(--color-surface-chip);border:1px solid var(--color-border-default);border-radius:var(--radius-pill);padding:8px 15px;white-space:nowrap;align-self:center;}
-  .page-head .head-banner{margin:0 auto;align-self:center}
+  .daterange-row .head-banner{align-self:stretch;width:300px;box-sizing:border-box;padding:0 14px;border-radius:var(--radius-lg);font-size:12.5px;overflow:hidden}
+  .daterange-row .head-banner .load-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .load-banner.ready{color:var(--color-status-success);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.08);}
   .load-banner .ic{width:14px;height:14px;flex:none;}
   .load-spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--color-border-strong);border-top-color:var(--color-accent);animation:cre-spin .8s linear infinite;flex:none;}
@@ -2680,6 +2681,7 @@ function renderDateRange(){
 
   return `<div class="daterange ${state.drOpen?'open':''}" id="dr">
     <div class="daterange-row">
+      ${isLoading() ? `<div class="load-banner head-banner"><span class="load-spin"></span><span class="load-text">Some sections are still loading&hellip;<span id="loadDetail" class="load-detail">${state.progressMsg?' · '+esc(state.progressMsg):''}</span></span></div>` : ''}
       <div class="hdr-account">${xselect({id:'account', value:state.account, options:accountOptionsList(), searchLabel:'accounts'})}</div>
       <div class="daterange-trigger" data-trigger="dr">
         ${ic('calendar',14)}
@@ -3588,18 +3590,10 @@ function renderCreativeOverview(){
       <h1>Creative Overview</h1>
       <p>Understand your creatives better with fastrr intelligence</p>
     </div>
-    ${!isLoading() ? '' : `<div class="load-banner head-banner"><span class="load-spin"></span><span>Some sections are still loading&hellip;<span id="loadDetail" class="load-detail">${state.progressMsg?' · '+esc(state.progressMsg):''}</span></span></div>`}
     ${renderDateRange()}
   </section>`;
 
   html += renderConfigBar();
-
-  const chips=[];
-  if(state.campaign!=='all') chips.push({k:'campaign', label:'Campaign', v: state.campaign==='unattributed'?'Unattributed':state.campaign});
-  if(state.sku!=='all') chips.push({k:'sku', label:'SKU', v: state.sku==='multi'?'Combo-ads':state.sku==='unclassified'?'Unclassified':skuName(state.sku)});
-  if(state.creative) chips.push({k:'creative', label:'Creative', v: state.creative});
-  if(state.creativeType!=='all') chips.push({k:'creativeType', label:'Type', v: state.creativeType});
-  if(chips.length) html += `<div class="active-filters">${chips.map(c=>`<div class="chip">${c.label}: <b>${esc(c.v)}</b><span class="x" data-clear="${c.k}">${ic('close',11)}</span></div>`).join('')}</div>`;
 
   if(state.broadLoading){
     html += renderBroadSkeleton();
