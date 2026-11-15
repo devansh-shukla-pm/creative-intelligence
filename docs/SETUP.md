@@ -14,7 +14,7 @@ Everything below uses free tiers. You do these once.
    - **Valid OAuth Redirect URIs**: `https://<your-domain>/api/auth/callback`
    - **App Domains** (Settings, Basic): `<your-domain>`
 3. Settings, Basic: copy the **App ID** and **App Secret**. Add a privacy policy URL.
-4. Permissions: the app asks for `ads_read`. While the app is in **Development mode**, only people you add under App Roles (Administrators, Developers, Testers) can log in, and `ads_read` works for them without App Review. This is enough for you and your testers.
+4. Permissions: the app asks for `ads_read` (ad data) plus `pages_read_engagement` and `pages_show_list` (Meta only returns video files and video frames to a token with Page access; without them video ads are read from one thumbnail and call-to-action text is missed). While the app is in **Development mode**, only people you add under App Roles (Administrators, Developers, Testers) can log in, and these permissions work for them without App Review. If the login screen does not offer them, add them in the app dashboard under Use cases, Customize, Permissions and features. Users must log out and connect again after the permission list changes. This is enough for you and your testers.
 5. Going public later needs Business Verification and App Review for `ads_read` (days to weeks). Not needed now.
 6. Use the stable production domain. Preview URLs change on every deploy and will not match the redirect URI.
 

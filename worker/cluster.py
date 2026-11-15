@@ -122,6 +122,23 @@ def _merge_memory(old, new):
             if isinstance(l, str) and l and l not in cur: cur.append(l)
     return out
 
+def _collect(result, ids, assign, only=None, tag=""):
+    """Copy labels from a clustering result into assign {ad_id: {field: label}}. Proof point ids look like 'ad_id::point'."""
+    seen = {}
+    for f, fd in (result.get("fields") or {}).items():
+        if only is not None and f not in only: continue
+        n_ids = n_hit = 0
+        for c in (fd or {}).get("clusters", []) if isinstance(fd, dict) else []:
+            label = c.get("cluster_label")
+            for i in c.get("ad_ids", []) or []:
+                n_ids += 1
+                i = str(i).split("::")[0]
+                if label and i in ids:
+                    n_hit += 1
+                    assign.setdefault(i, {}).setdefault(f, label)
+        seen[f] = (n_ids, n_hit)
+    print(f"[cluster]{tag} fields returned (ids, matched): {seen}", flush=True)
+
 def cluster_batch(llm, batch, memory):
     """-> (assignments {ad_id: {field: label}}, updated memory). Retries when the output drops or duplicates ad_ids."""
     last_problems = []
@@ -132,13 +149,7 @@ def cluster_batch(llm, batch, memory):
         if not last_problems: break
     assign = {}
     ids = {a["ad_id"] for a in batch}
-    for f, fd in (result.get("fields") or {}).items():
-        for c in (fd or {}).get("clusters", []):
-            label = c.get("cluster_label")
-            for i in c.get("ad_ids", []):
-                i = str(i)
-                if label and i in ids:
-                    assign.setdefault(i, {})[f] = label
+    _collect(result, ids, assign)
     mem = _merge_memory(memory, result.get("updated_cluster_memory"))
     for f, fd in (result.get("fields") or {}).items():       # labels used but missing from memory still get remembered
         mem = _merge_memory(mem, {f: [c.get("cluster_label") for c in (fd or {}).get("clusters", [])]})
@@ -151,18 +162,13 @@ def cluster_batch(llm, batch, memory):
         try:
             res2 = llm.chat_json(config.CLUSTER_MODEL, build_clustering_prompt(mem) + "\n" + json.dumps(sub, indent=2),
                                  max_tokens=16000, label="clustering-retry")
+            _collect(res2, ids, assign, only=set(skipped), tag="[retry]")
             for f, fd in (res2.get("fields") or {}).items():
-                if f not in skipped: continue
-                for c in (fd or {}).get("clusters", []):
-                    label = c.get("cluster_label")
-                    for i in c.get("ad_ids", []):
-                        i = str(i)
-                        if label and i in ids:
-                            assign.setdefault(i, {})[f] = label
-                mem = _merge_memory(mem, {f: [c.get("cluster_label") for c in (fd or {}).get("clusters", [])]})
+                if f in skipped and isinstance(fd, dict):
+                    mem = _merge_memory(mem, {f: [c.get("cluster_label") for c in fd.get("clusters", [])]})
             mem = _merge_memory(mem, res2.get("updated_cluster_memory"))
-        except LLMError:
-            pass
+        except LLMError as e:
+            print(f"[cluster] retry failed: {e}", flush=True)
         print(f"[cluster] retried skipped fields {skipped}; still unlabeled: "
               f"{[f for f in skipped if any(a.get(f) and f not in assign.get(a['ad_id'], {}) for a in batch)]}", flush=True)
     return assign, mem, last_problems
