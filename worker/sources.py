@@ -47,6 +47,12 @@ class MetaSource:
         src = mc.pull_video_sources(self.token, by_video.keys())
         return {by_video[v]: (info or {}).get("source") for v, info in src.items() if (info or {}).get("source")}
 
+    def video_frames(self, ads):
+        """ad_id -> still frames, used when the video file itself is not available."""
+        by_video = {a["creative"]["video_id"]: a["ad_id"] for a in ads if a["creative"].get("video_id")}
+        fr = mc.pull_video_frames(self.token, by_video.keys())
+        return {by_video[v]: u for v, u in fr.items()}
+
     def thumbnail(self, ad):
         c = ad["creative"]
         return mc.fetch_thumbnail(c.get("image_url") or c.get("thumbnail_url"))

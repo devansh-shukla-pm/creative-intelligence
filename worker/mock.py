@@ -49,6 +49,9 @@ class MockSource:
     def video_urls(self, ads):
         return {a["ad_id"]: a["creative"]["preview_link"] for a in ads if a["creative"].get("video_id")}
 
+    def video_frames(self, ads):
+        return {}
+
     def thumbnail(self, ad):
         base = Path(__file__).resolve().parent.parent / "app"
         i = ad["ad_id"]

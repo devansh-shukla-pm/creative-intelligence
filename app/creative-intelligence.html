@@ -359,6 +359,7 @@
 
   /* ================= locked / loading state ================= */
   .load-banner{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--color-text-secondary);background:var(--color-surface-chip);border:1px solid var(--color-border-default);border-radius:var(--radius-pill);padding:8px 15px;white-space:nowrap;align-self:center;}
+  .page-head .head-banner{margin:0 auto;align-self:center}
   .load-banner.ready{color:var(--color-status-success);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.08);}
   .load-banner .ic{width:14px;height:14px;flex:none;}
   .load-spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--color-border-strong);border-top-color:var(--color-accent);animation:cre-spin .8s linear infinite;flex:none;}
@@ -3508,8 +3509,15 @@ function wireCmtNameTooltips(content){
 }
 
 let comboChartItems = [];
+function stagesWithData(ads){
+  if(!state.sigB) return STAGE_DEFS;                       // classification not ready yet: keep the full list
+  const have = STAGE_DEFS.filter(s=>ads.some(a=>a.stages && a.stages[s.key]));
+  return have.length ? have : STAGE_DEFS;
+}
 function renderStageOverview(){
   const ads = scopedAds();
+  const visibleStages = stagesWithData(ads);
+  if(!visibleStages.some(s=>s.key===state.stageFocus)) state.stageFocus = visibleStages[0].key;
   const angles = angleAggForStage(ads, state.stageFocus).filter(a=>a.n>=1).sort((a,b)=>(b.roas||0)-(a.roas||0));
   const top = angles.slice(0,10);
   comboChartItems = top;
@@ -3518,7 +3526,7 @@ function renderStageOverview(){
     <div class="section-label">Creative Stage Overview</div>
     <div class="local-controls">
       <div class="stage-pill-row">
-        ${STAGE_DEFS.map(s=>`<button class="stagepill ${state.stageFocus===s.key?'active':''}" data-stage="${s.key}" title="${s.mandatory?'Mandatory stage':'Conditional stage'}">${esc(s.label)}${s.mandatory?'':'<span class=\"optdot\" title=\"Conditional stage\"></span>'}</button>`).join('')}
+        ${visibleStages.map(s=>`<button class="stagepill ${state.stageFocus===s.key?'active':''}" data-stage="${s.key}" title="${s.mandatory?'Mandatory stage':'Conditional stage'}">${esc(s.label)}${s.mandatory?'':'<span class=\"optdot\" title=\"Conditional stage\"></span>'}</button>`).join('')}
       </div>
     </div>
     <div class="row-50">
@@ -3579,8 +3587,8 @@ function renderCreativeOverview(){
     <div>
       <h1>Creative Overview</h1>
       <p>Understand your creatives better with fastrr intelligence</p>
-      ${!isLoading() ? '' : `<div class="load-banner" style="margin-top:10px;display:inline-flex"><span class="load-spin"></span><span>Some sections are still loading&hellip;<span id="loadDetail" class="load-detail">${state.progressMsg?' · '+esc(state.progressMsg):''}</span></span></div>`}
     </div>
+    ${!isLoading() ? '' : `<div class="load-banner head-banner"><span class="load-spin"></span><span>Some sections are still loading&hellip;<span id="loadDetail" class="load-detail">${state.progressMsg?' · '+esc(state.progressMsg):''}</span></span></div>`}
     ${renderDateRange()}
   </section>`;
 

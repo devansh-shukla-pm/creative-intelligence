@@ -14,7 +14,7 @@ DONE = ("ok", "fallback", "skipped", "failed")
 def _image_parts(urls):
     return [{"type": "image_url", "image_url": {"url": u}} for u in urls if u]
 
-def extract_one(llm, ad, video_url=None):
+def extract_one(llm, ad, video_url=None, frames=None):
     """-> (extraction dict, used_fallback). Raises if there is nothing usable to send or the model keeps failing."""
     c = ad["creative"]
     prompt = [{"type": "text", "text": extraction_prompt()}]
@@ -33,6 +33,9 @@ def extract_one(llm, ad, video_url=None):
     if c.get("media_type") == "CAROUSEL" and c.get("carousel_urls"):
         return llm.chat_json(config.EXTRACTION_MODEL, prompt + _image_parts(c["carousel_urls"]), max_tokens=6000, label="extraction"), False
 
+    if is_video and frames:                      # several frames, including the end card, beat one thumbnail
+        return llm.chat_json(config.EXTRACTION_MODEL, prompt + _image_parts(frames), max_tokens=6000, label="extraction"), True
+
     image = c.get("thumbnail_url") if is_video else (c.get("image_url") or c.get("thumbnail_url"))
     image = image or c.get("thumbnail_url") or c.get("image_url")
     if not image:
@@ -42,6 +45,8 @@ def extract_one(llm, ad, video_url=None):
 
 def needs_extraction(row):
     if row is None: return True
+    if row.get("extraction_status") == "fallback" and (row.get("extraction_attempts") or 0) < 2:
+        return True                              # read from one thumbnail only: give it one more go with video / frames
     if row.get("extraction_status") in DONE: return False
     return True
 
@@ -54,12 +59,14 @@ def run_extraction(conn, rep, llm, source, ads, cached, progress):
         progress(f"All {total_ads} ads already classified (cache)", total_ads, total_ads)
         return {"new": 0, "ok": 0, "failed": 0}
 
-    video_urls = source.video_urls([a for a in todo if a["creative"].get("media_type") == "VIDEO"]) if todo else {}
+    vids = [a for a in todo if a["creative"].get("media_type") == "VIDEO"]
+    video_urls = source.video_urls(vids) if vids else {}
+    frames = source.video_frames([a for a in vids if a["ad_id"] not in video_urls]) if vids else {}
     done = already; ok = failed = 0
     progress(f"Reading {len(todo)} new ads ({already} already cached)", done, total_ads)
 
     def work(ad):
-        return extract_one(llm, ad, video_urls.get(ad["ad_id"]))
+        return extract_one(llm, ad, video_urls.get(ad["ad_id"]), frames.get(ad["ad_id"]))
 
     with cf.ThreadPoolExecutor(max_workers=config.EXTRACT_CONCURRENCY) as pool:
         futs = {pool.submit(work, a): a for a in todo}

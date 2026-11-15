@@ -152,15 +152,46 @@ def pull_ad_details(token, ad_ids):
         out.update(body)
     return out
 
-def pull_video_sources(token, video_ids):
-    """Short-lived mp4 URLs the extraction model can fetch right now. Never stored long term."""
+def _per_id(token, video_ids, fields, label):
+    """Graph batch lookups fail as a whole when one id is not permitted, so retry the ids one by one."""
     out = {}
     for chunk in _chunks(sorted(set(video_ids)), 50):
         try:
-            body = _get(GRAPH + "/", {"ids": ",".join(chunk), "fields": "source,picture,length"}, token)
-        except MetaError:
-            continue                                            # no permission for some videos: extraction falls back to the thumbnail
-        out.update(body)
+            out.update(_get(GRAPH + "/", {"ids": ",".join(chunk), "fields": fields}, token))
+            continue
+        except TokenExpired:
+            raise
+        except MetaError as e:
+            print(f"[meta] {label} batch of {len(chunk)} failed ({e}); retrying one by one", flush=True)
+        errors = {}
+        for vid in chunk:
+            try:
+                out[vid] = _get(f"{GRAPH}/{vid}", {"fields": fields}, token, tries=2)
+            except TokenExpired:
+                raise
+            except MetaError as e:
+                errors[str(e)[:140]] = errors.get(str(e)[:140], 0) + 1
+        for msg, n in errors.items():
+            print(f"[meta] {label}: {n} videos unavailable: {msg}", flush=True)
+    return out
+
+def pull_video_sources(token, video_ids):
+    """Short-lived mp4 URLs the extraction model can fetch right now. Never stored long term."""
+    out = _per_id(token, video_ids, "source,picture,length", "video source")
+    print(f"[meta] video sources: {sum(1 for v in out.values() if (v or {}).get('source'))} of {len(set(video_ids))} available", flush=True)
+    return out
+
+def pull_video_frames(token, video_ids):
+    """video_id -> up to 4 still frames spread across the video (the last frame usually holds the end card and CTA)."""
+    raw = _per_id(token, video_ids, "thumbnails{uri,is_preferred}", "video frames")
+    out = {}
+    for vid, info in raw.items():
+        uris = [t.get("uri") for t in ((info or {}).get("thumbnails") or {}).get("data", []) if t.get("uri")]
+        if not uris: continue
+        if len(uris) > 4:
+            idx = sorted({0, len(uris) // 3, (2 * len(uris)) // 3, len(uris) - 1})
+            uris = [uris[i] for i in idx]
+        out[vid] = uris
     return out
 
 def creative_info(detail: dict) -> dict:

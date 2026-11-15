@@ -83,9 +83,11 @@ The "updated_cluster_memory" object must contain the COMPLETE list of all cluste
 
 Here is the ad data to cluster:"""
 
-def ad_free_text(ad_id, extraction):
+def ad_free_text(ad_id, extraction, only=None):
     obj = {"ad_id": ad_id}
     for f in FREE_TEXT_FIELDS:
+        if only is not None and f not in only:
+            obj[f] = None; continue
         v = extraction.get(f)
         if f == "proof_points":
             arr = v if isinstance(v, list) else ([v] if v else [])
@@ -140,17 +142,45 @@ def cluster_batch(llm, batch, memory):
     mem = _merge_memory(memory, result.get("updated_cluster_memory"))
     for f, fd in (result.get("fields") or {}).items():       # labels used but missing from memory still get remembered
         mem = _merge_memory(mem, {f: [c.get("cluster_label") for c in (fd or {}).get("clusters", [])]})
+
+    # The model sometimes skips a whole field. Ask again for just those fields, once.
+    skipped = [f for f in FREE_TEXT_FIELDS
+               if any(a.get(f) and f not in assign.get(a["ad_id"], {}) for a in batch)]
+    if skipped:
+        sub = [{**{k: a.get(k) if (k == "ad_id" or k in skipped) else None for k in a}} for a in batch]
+        try:
+            res2 = llm.chat_json(config.CLUSTER_MODEL, build_clustering_prompt(mem) + "\n" + json.dumps(sub, indent=2),
+                                 max_tokens=16000, label="clustering-retry")
+            for f, fd in (res2.get("fields") or {}).items():
+                if f not in skipped: continue
+                for c in (fd or {}).get("clusters", []):
+                    label = c.get("cluster_label")
+                    for i in c.get("ad_ids", []):
+                        i = str(i)
+                        if label and i in ids:
+                            assign.setdefault(i, {})[f] = label
+                mem = _merge_memory(mem, {f: [c.get("cluster_label") for c in (fd or {}).get("clusters", [])]})
+            mem = _merge_memory(mem, res2.get("updated_cluster_memory"))
+        except LLMError:
+            pass
+        print(f"[cluster] retried skipped fields {skipped}; still unlabeled: "
+              f"{[f for f in skipped if any(a.get(f) and f not in assign.get(a['ad_id'], {}) for a in batch)]}", flush=True)
     return assign, mem, last_problems
 
 def run_clustering(conn, rep, llm, extracted_ads, cached, progress):
     """extracted_ads: [{ad_id, extraction}] for ads that have an extraction. Only those without cached labels are sent."""
-    new = [a for a in extracted_ads if (cached.get(a["ad_id"]) or {}).get("cluster_labels") is None]
+    def _missing(a):
+        lab = (cached.get(a["ad_id"]) or {}).get("cluster_labels")
+        if lab is None: return list(FREE_TEXT_FIELDS)
+        return [f for f in FREE_TEXT_FIELDS if ad_free_text(a["ad_id"], a["extraction"]).get(f) and f not in lab]
+    need = {a["ad_id"]: _missing(a) for a in extracted_ads}
+    new = [a for a in extracted_ads if need[a["ad_id"]]]
     total = len(extracted_ads)
     if not new:
         progress(f"All {total} ads already grouped (cache)", total, total)
         return {"new": 0, "failed_batches": 0}
     memory, _ = cache.load_memory(conn, rep.account_id)
-    objs = [ad_free_text(a["ad_id"], a["extraction"]) for a in new]
+    objs = [ad_free_text(a["ad_id"], a["extraction"], only=need[a["ad_id"]]) for a in new]
     empty = [o["ad_id"] for o in objs if not any(o.get(f) for f in FREE_TEXT_FIELDS)]
     for ad_id in empty:                                       # nothing to group: mark as processed
         cache.save_cluster_labels(conn, rep.account_id, ad_id, {})
@@ -166,7 +196,8 @@ def run_clustering(conn, rep, llm, extracted_ads, cached, progress):
             failed += 1                                       # these ads stay unlabeled and are retried on the next run
             continue
         for o in batch:
-            cache.save_cluster_labels(conn, rep.account_id, o["ad_id"], assign.get(o["ad_id"], {}))
+            merged = {**((cached.get(o["ad_id"]) or {}).get("cluster_labels") or {}), **assign.get(o["ad_id"], {})}
+            cache.save_cluster_labels(conn, rep.account_id, o["ad_id"], merged)
         cache.save_cluster_memory(conn, rep.account_id, memory)
         done += len(batch)
     if batches and failed == len(batches):
