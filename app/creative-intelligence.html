@@ -1299,7 +1299,7 @@
   :root[data-theme="light"] ::selection{color:#fff;}
   .theme-btn{width:30px;height:30px;border-radius:var(--radius-sm);border:1px solid var(--color-border-default);background:var(--color-surface-card);color:var(--color-text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;line-height:1;}
   .theme-btn:hover{color:var(--color-text-heading);border-color:var(--color-border-strong);}
-  .breadcrumb-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:var(--sp-6);}
+  .breadcrumb-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:var(--sp-6);}
   .breadcrumb-row .breadcrumb{margin-bottom:0;}
   :root[data-theme="light"] .stat-card{background-color:#fff;border-color:var(--color-border-default);box-shadow:0 1px 2px rgba(15,15,25,.04);}
   :root[data-theme="light"] .stat-label{color:var(--color-text-muted);}
@@ -1895,8 +1895,12 @@
   #statusBar{padding:0 var(--sp-6)}
   .status-err{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 var(--sp-4);padding:12px 16px;border-radius:var(--radius-lg);background:rgba(234,84,112,.1);border:1px solid rgba(234,84,112,.35);font-size:13px;color:var(--color-text-secondary)}
   .status-err button{border:none;cursor:pointer;font:700 12px var(--font-primary);color:#fff;background:var(--gradient-primary);border-radius:var(--radius-md);padding:8px 14px}
-  .user-box{display:inline-flex;align-items:center;gap:10px;font-size:12px;color:var(--color-text-subtle);margin-right:12px}
-  .user-box button{border:none;background:none;cursor:pointer;color:var(--color-text-accent);font:600 12px var(--font-primary);padding:0}
+  .user-box{display:inline-flex;align-items:center;gap:8px;height:30px;box-sizing:border-box;margin-left:auto;padding:0 4px 0 4px;border:1px solid var(--color-border-default);border-radius:var(--radius-pill);background:var(--color-surface-card);font-size:12px;font-weight:500;color:var(--color-text-secondary);white-space:nowrap}
+  .user-box:empty{display:none}
+  .user-box .u-av{width:22px;height:22px;border-radius:50%;background:var(--color-accent-soft);color:var(--color-text-accent);display:flex;align-items:center;justify-content:center;font:700 11px var(--font-primary);text-transform:uppercase}
+  .user-box .u-sep{width:1px;height:14px;background:var(--color-border-default)}
+  .user-box button{border:none;background:none;cursor:pointer;color:var(--color-text-subtle);font:500 12px var(--font-primary);padding:0 10px 0 0;height:100%;transition:color .15s}
+  .user-box button:hover{color:var(--color-status-error)}
 </style>
 
 <div class="shell">
@@ -7973,7 +7977,7 @@ function renderUserBox(){
   const el = document.getElementById('userBox'); if(!el) return;
   if(!LIVE){ el.innerHTML=''; return; }
   const n = (window.__BOOT.user && window.__BOOT.user.name) || '';
-  el.innerHTML = `${n?esc(n):''}<button id="logoutBtn">Log out</button>`;
+  el.innerHTML = `${n?`<span class="u-av">${esc(n.trim().charAt(0))}</span><span>${esc(n)}</span><span class="u-sep"></span>`:''}<button id="logoutBtn" title="Log out">Log out</button>`;
   document.getElementById('logoutBtn').onclick = async ()=>{ await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'}); location.href='/'; };
 }
 function currentRangeISO(){
