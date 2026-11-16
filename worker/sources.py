@@ -19,10 +19,15 @@ class MetaSource:
     def fetch_ads(self, rep, on_progress=None):
         """-> [{ad_id, ad_name, campaign_id, campaign_name, metrics, creative}]"""
         try:
-            rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
-                                    on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
+            rows = cache.get_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to)
+            if rows is None:
+                rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
+                                        on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
+                cache.put_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to, rows)
+            elif on_progress:
+                on_progress(f"Loaded {len(rows)} ads (pulled earlier today)")
             ids = [r["ad_id"] for r in rows]
-            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids) if ids else {}      # read in the last day: do not ask Meta again
+            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else {}      # read in the last week: do not ask Meta again
             need = [i for i in ids if i not in fresh]
             details = mc.pull_ad_details(self.token, need,
                                          on_progress=(lambda n: on_progress(f"Reading creative details: {n} of {len(need)}")) if on_progress else None) if need else {}

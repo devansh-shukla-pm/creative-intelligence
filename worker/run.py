@@ -159,6 +159,8 @@ def run(report_id):
         stage_window(rep, source, llm, ads, data)
         for job in _BG: job.result()          # thumbnails still downloading
         _BG.clear()
+        from . import meta_client
+        print(f"[meta] requests made by this run: {meta_client.CALLS[0]}", flush=True)
         rep.finish()
     except ReportError as e:
         rep.fail(str(e)); print("FAILED:", e, file=sys.stderr); return 1

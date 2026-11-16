@@ -152,3 +152,35 @@ def test_fresh_creatives_and_batch_writes(conn):
     assert set(cache.fresh_creatives(conn, "acct-x", ["a1", "a2"])) == {"a2"}
     cache.save_thumbs_batch(conn, "acct-x", [("a1", b"x"), ("a2", b"y")])
     assert cache.has_thumb(conn, "acct-x", ["a1", "a2", "a9"]) == {"a1", "a2"}
+
+
+def test_video_access_probe_stops_after_three_refusals(monkeypatch):
+    from worker import meta_client as mc
+    calls = []
+    def fake_get(url, params=None, token=None, tries=5):
+        calls.append(url)
+        raise mc.MetaError("(#10) Application does not have permission", 10, 400)
+    monkeypatch.setattr(mc, "_get", fake_get)
+    monkeypatch.setitem(mc._video_blocked, "code", None)
+    assert mc.pull_video_sources("t", [str(i) for i in range(500)]) == {}
+    assert len(calls) == 4                      # one batch call + three single probes, not 500+ calls
+    assert mc.pull_video_frames("t", ["1", "2"]) == {} and len(calls) == 4      # and nothing more once blocked
+    monkeypatch.setitem(mc._video_blocked, "code", None)
+
+
+def test_insights_cache_roundtrip(conn):
+    from worker import cache
+    assert cache.get_insights(conn, "acct-i", "2026-01-01", "2026-01-31") is None
+    cache.put_insights(conn, "acct-i", "2026-01-01", "2026-01-31", [{"ad_id": "1", "spend": "5"}])
+    assert cache.get_insights(conn, "acct-i", "2026-01-01", "2026-01-31") == [{"ad_id": "1", "spend": "5"}]
+    conn.execute("UPDATE insights_cache SET fetched_at = now() - interval '7 hours' WHERE account_id='acct-i'")
+    assert cache.get_insights(conn, "acct-i", "2026-01-01", "2026-01-31") is None
+
+
+def test_usage_header_throttle(monkeypatch):
+    from worker import meta_client as mc
+    slept = []
+    monkeypatch.setattr(mc.time, "sleep", lambda s: slept.append(s))
+    mc._watch_usage({"x-app-usage": '{"call_count": 40}'}); assert slept == []
+    mc._watch_usage({"x-app-usage": '{"call_count": 80}'}); assert slept == [5]
+    mc._watch_usage({"x-business-use-case-usage": '{"1":[{"call_count": 50, "estimated_time_to_regain_access": 2}]}'}); assert slept[-1] == 120

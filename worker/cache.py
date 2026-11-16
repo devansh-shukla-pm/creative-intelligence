@@ -96,3 +96,16 @@ def reuse_window_results(conn, rep, wfrom, wto):
                     SELECT %s::uuid, kind, body FROM report_payloads WHERE report_id=%s AND kind IN ('insights','lab')
                     ON CONFLICT (report_id, kind) DO UPDATE SET body = EXCLUDED.body, updated_at = now()""", (rep.id, r["id"]))
     return True
+
+
+INSIGHTS_TTL_HOURS = 6
+
+def get_insights(conn, account_id, date_from, date_to, hours=INSIGHTS_TTL_HOURS):
+    r = conn.execute("""SELECT rows FROM insights_cache WHERE account_id=%s AND date_from=%s AND date_to=%s
+                          AND fetched_at > now() - make_interval(hours => %s)""", (account_id, date_from, date_to, hours)).fetchone()
+    return r["rows"] if r else None
+
+def put_insights(conn, account_id, date_from, date_to, rows):
+    conn.execute("""INSERT INTO insights_cache (account_id, date_from, date_to, rows) VALUES (%s,%s,%s,%s)
+                    ON CONFLICT (account_id, date_from, date_to) DO UPDATE SET rows=EXCLUDED.rows, fetched_at=now()""",
+                 (account_id, date_from, date_to, db.J(rows)))

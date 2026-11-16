@@ -5,7 +5,7 @@ Produces rows in the same shape as the old creative-audit table-report API
 plus campaign id and name. Percentages are relative to link clicks, matching the old API.
 """
 from __future__ import annotations
-import io, json, time
+import io, json, threading, time
 import requests
 from . import config
 
@@ -29,6 +29,30 @@ class MetaError(Exception):
 class TokenExpired(MetaError):
     """The user's Meta token is no longer valid: they need to connect Meta again."""
 
+CALLS = [0]                                   # Meta requests made by this run
+_usage_lock = threading.Lock()
+_usage_last_log = [0.0]
+
+def _watch_usage(headers):
+    """Meta reports how much of the app's and the ad account's call budget is used. Slow down well before the limit is hit."""
+    pct = 0; wait = 0
+    try:
+        app = json.loads(headers.get("x-app-usage") or "{}")
+        pct = max([pct] + [v for v in app.values() if isinstance(v, (int, float))])
+        buc = json.loads(headers.get("x-business-use-case-usage") or "{}")
+        for lst in buc.values():
+            for u in lst:
+                pct = max([pct] + [u.get(k, 0) for k in ("call_count", "total_cputime", "total_time")])
+                wait = max(wait, int(u.get("estimated_time_to_regain_access") or 0) * 60)
+    except (ValueError, TypeError, AttributeError):
+        return
+    with _usage_lock:
+        if pct >= 50 and time.time() - _usage_last_log[0] > 30:
+            _usage_last_log[0] = time.time(); print(f"[meta] API budget used: {pct}%", flush=True)
+    if wait: time.sleep(min(wait, 300))
+    elif pct >= 90: time.sleep(30)
+    elif pct >= 75: time.sleep(5)
+
 def _get(url, params=None, token=None, tries=5):
     params = dict(params or {})
     if token and "access_token" not in params:
@@ -44,6 +68,8 @@ def _get(url, params=None, token=None, tries=5):
         try: body = r.json()
         except ValueError: pass
         err = body.get("error") if isinstance(body, dict) else None
+        CALLS[0] += 1
+        _watch_usage(r.headers)
         if r.status_code == 200 and not err:
             return body
         code = (err or {}).get("code")
@@ -127,20 +153,20 @@ def _async_insights(token, account_id, params):
     return _paged(f"/{rid}/insights", {"limit": 500}, token)
 
 def pull_period_totals(token, account_id, since, until):
-    """Totals for a period (ads with spend, spend, revenue, roas): used for the trend on the summary cards."""
-    rows = _paged(f"/act_{account_id}/insights", {
-        "level": "ad", "fields": "ad_id,spend,actions,action_values", "limit": 500,
+    """Totals for a period (spend, revenue, roas) for the trend on the summary cards. One account-level call, not an ad-level pull."""
+    body = _get(f"{GRAPH}/act_{account_id}/insights", {
+        "level": "account", "fields": "spend,actions,action_values",
         "time_range": json.dumps({"since": since, "until": until}),
-        "filtering": json.dumps([{"field": "spend", "operator": "GREATER_THAN", "value": "0"}]),
     }, token)
+    rows = body.get("data", [])
     spend = sum(_f(r.get("spend")) for r in rows)
     revenue = sum(_action(r.get("action_values"), PURCHASE) for r in rows)
-    return {"from": since, "to": until, "ads": len(rows), "spend": spend, "revenue": revenue, "roas": (revenue / spend) if spend > 0 else 0.0}
+    return {"from": since, "to": until, "ads": 0, "spend": spend, "revenue": revenue, "roas": (revenue / spend) if spend > 0 else 0.0}
 
 def _chunks(seq, n):
     for i in range(0, len(seq), n): yield seq[i:i + n]
 
-def pull_ad_details(token, ad_ids, on_progress=None, workers=6):
+def pull_ad_details(token, ad_ids, on_progress=None, workers=3):
     """Creative info per ad (multi-id read, 50 at a time, several batches at once)."""
     import concurrent.futures as cf
     chunks = list(_chunks(list(ad_ids), 50))
@@ -157,9 +183,15 @@ def pull_ad_details(token, ad_ids, on_progress=None, workers=6):
             if on_progress: on_progress(len(out))
     return out
 
+_video_blocked = {"code": None}          # set when Meta refuses video access for this login: stop spending calls on it
+PERMISSION_CODES = {10, 283}
+
 def _per_id(token, video_ids, fields, label):
-    """Graph batch lookups fail as a whole when one id is not permitted, so retry the ids one by one."""
+    """Graph batch lookups fail as a whole when one id is not permitted, so retry the ids one by one. If a small sample
+    shows Meta refuses all of them for lack of permission, give up instead of making hundreds of calls that will fail."""
     out = {}
+    if _video_blocked["code"]:
+        return out
     for chunk in _chunks(sorted(set(video_ids)), 50):
         try:
             out.update(_get(GRAPH + "/", {"ids": ",".join(chunk), "fields": fields}, token))
@@ -168,7 +200,7 @@ def _per_id(token, video_ids, fields, label):
             raise
         except MetaError as e:
             print(f"[meta] {label} batch of {len(chunk)} failed ({e}); retrying one by one", flush=True)
-        errors = {}
+        errors = {}; tried = 0; refused = 0; last_code = None
         for vid in chunk:
             try:
                 out[vid] = _get(f"{GRAPH}/{vid}", {"fields": fields}, token, tries=2)
@@ -176,8 +208,16 @@ def _per_id(token, video_ids, fields, label):
                 raise
             except MetaError as e:
                 errors[str(e)[:140]] = errors.get(str(e)[:140], 0) + 1
+                refused += 1 if e.code in PERMISSION_CODES else 0
+                last_code = e.code
+            tried += 1
+            if tried == 3 and refused == 3 and not out:
+                _video_blocked["code"] = last_code
+                print(f"[meta] {label}: Meta refuses video access (code {last_code}); skipping the remaining lookups", flush=True)
+                break
         for msg, n in errors.items():
             print(f"[meta] {label}: {n} videos unavailable: {msg}", flush=True)
+        if _video_blocked["code"]: break
     return out
 
 def pull_video_sources(token, video_ids):
@@ -199,7 +239,7 @@ def pull_video_frames(token, video_ids):
         out[vid] = uris
     return out
 
-def pull_account_videos(token, account_id, wanted_ids, max_pages=40):
+def pull_account_videos(token, account_id, wanted_ids, max_pages=5):
     """Videos owned by the ad account itself. Needs only ads_read (no Page access), so it works when the per-video lookup is refused.
     Stops as soon as every wanted id has been seen."""
     wanted = set(map(str, wanted_ids)); found = {}

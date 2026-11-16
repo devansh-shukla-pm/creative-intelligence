@@ -96,3 +96,14 @@ CREATE TABLE IF NOT EXISTS thumbs (
   updated_at    timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (account_id, ad_id)
 );
+
+-- Meta insight rows already pulled for an account and date range: the same request within a few hours is answered from here,
+-- not from Meta (protects the app's API rate limit).
+CREATE TABLE IF NOT EXISTS insights_cache (
+  account_id  text NOT NULL,
+  date_from   date NOT NULL,
+  date_to     date NOT NULL,
+  rows        jsonb NOT NULL,
+  fetched_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, date_from, date_to)
+);
