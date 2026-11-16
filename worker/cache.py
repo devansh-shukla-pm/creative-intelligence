@@ -12,6 +12,21 @@ def save_creative(conn, account_id, ad_id, creative):
            ON CONFLICT (account_id, ad_id) DO UPDATE SET creative = ad_cache.creative || EXCLUDED.creative, updated_at = now()""",
         (account_id, ad_id, db.J(creative)))
 
+def save_creatives_batch(conn, account_id, items):
+    """items: [(ad_id, creative dict)]. One round trip per chunk instead of one per ad."""
+    with conn.cursor() as cur:
+        cur.executemany(
+            """INSERT INTO ad_cache (account_id, ad_id, creative) VALUES (%s,%s,%s)
+               ON CONFLICT (account_id, ad_id) DO UPDATE SET creative = ad_cache.creative || EXCLUDED.creative, updated_at = now()""",
+            [(account_id, ad_id, db.J(c)) for ad_id, c in items])
+
+def fresh_creatives(conn, account_id, ad_ids, hours=24):
+    """Creative info saved in the last `hours` hours, so Meta need not be asked about those ads again."""
+    rows = db.all_(conn, """SELECT ad_id, creative FROM ad_cache WHERE account_id=%s AND ad_id = ANY(%s)
+                              AND updated_at > now() - make_interval(hours => %s) AND creative ? 'media_type'""",
+                   (account_id, list(ad_ids), hours))
+    return {r["ad_id"]: r["creative"] for r in rows}
+
 def save_extraction(conn, account_id, ad_id, extraction, status, attempts):
     conn.execute(
         """UPDATE ad_cache SET extraction=%s, extraction_status=%s, extraction_attempts=%s, updated_at=now()
@@ -55,6 +70,13 @@ def save_thumb(conn, account_id, ad_id, data, content_type="image/jpeg"):
         """INSERT INTO thumbs (account_id, ad_id, content_type, bytes) VALUES (%s,%s,%s,%s)
            ON CONFLICT (account_id, ad_id) DO UPDATE SET bytes=EXCLUDED.bytes, content_type=EXCLUDED.content_type, updated_at=now()""",
         (account_id, ad_id, content_type, data))
+
+def save_thumbs_batch(conn, account_id, items, content_type="image/jpeg"):
+    with conn.cursor() as cur:
+        cur.executemany(
+            """INSERT INTO thumbs (account_id, ad_id, content_type, bytes) VALUES (%s,%s,%s,%s)
+               ON CONFLICT (account_id, ad_id) DO UPDATE SET bytes=EXCLUDED.bytes, content_type=EXCLUDED.content_type, updated_at=now()""",
+            [(account_id, ad_id, content_type, data) for ad_id, data in items])
 
 def save_report_ads(conn, report_id, ads):
     with conn.cursor() as cur:

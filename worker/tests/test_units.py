@@ -140,3 +140,15 @@ def test_ad_copy_from_creative():
     feed = {"asset_feed_spec": {"bodies": [{"text": "B1"}], "titles": [{"text": "T1"}], "call_to_action_types": ["LEARN_MORE"]}}
     assert ad_copy(feed) == {"primary_text": "B1", "headline": "T1", "cta_button": "Learn More"}
     assert ad_copy({}) == {}
+
+
+def test_fresh_creatives_and_batch_writes(conn):
+    from worker import cache
+    cache.save_creatives_batch(conn, "acct-x", [("a1", {"media_type": "VIDEO", "ad_name": "one"}), ("a2", {"media_type": "IMAGE"})])
+    cache.save_creatives_batch(conn, "acct-x", [("a3", {"ad_name": "no media type yet"})])
+    fresh = cache.fresh_creatives(conn, "acct-x", ["a1", "a2", "a3", "a4"])
+    assert set(fresh) == {"a1", "a2"} and fresh["a1"]["ad_name"] == "one"
+    conn.execute("UPDATE ad_cache SET updated_at = now() - interval '2 days' WHERE account_id='acct-x' AND ad_id='a1'")
+    assert set(cache.fresh_creatives(conn, "acct-x", ["a1", "a2"])) == {"a2"}
+    cache.save_thumbs_batch(conn, "acct-x", [("a1", b"x"), ("a2", b"y")])
+    assert cache.has_thumb(conn, "acct-x", ["a1", "a2", "a9"]) == {"a1", "a2"}

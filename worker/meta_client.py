@@ -101,7 +101,7 @@ def metrics_from_insight(row: dict) -> dict:
 
 def pull_insights(token, account_id, since, until, on_page=None):
     params = {
-        "level": "ad", "fields": INSIGHT_FIELDS, "limit": 200,
+        "level": "ad", "fields": INSIGHT_FIELDS, "limit": 500,
         "time_range": json.dumps({"since": since, "until": until}),
         "filtering": json.dumps([{"field": "spend", "operator": "GREATER_THAN", "value": "0"}]),
     }
@@ -140,16 +140,21 @@ def pull_period_totals(token, account_id, since, until):
 def _chunks(seq, n):
     for i in range(0, len(seq), n): yield seq[i:i + n]
 
-def pull_ad_details(token, ad_ids):
-    """Creative info per ad (multi-id read, 50 at a time)."""
+def pull_ad_details(token, ad_ids, on_progress=None, workers=6):
+    """Creative info per ad (multi-id read, 50 at a time, several batches at once)."""
+    import concurrent.futures as cf
+    chunks = list(_chunks(list(ad_ids), 50))
     out = {}
-    for chunk in _chunks(list(ad_ids), 50):
+    def one(chunk):
         try:
-            body = _get(GRAPH + "/", {"ids": ",".join(chunk), "fields": CREATIVE_FIELDS}, token)
+            return _get(GRAPH + "/", {"ids": ",".join(chunk), "fields": CREATIVE_FIELDS}, token)
         except MetaError as e:
             if e.code != 100: raise
-            body = _get(GRAPH + "/", {"ids": ",".join(chunk), "fields": CREATIVE_FIELDS_PLAIN}, token)   # modifier syntax not accepted
-        out.update(body)
+            return _get(GRAPH + "/", {"ids": ",".join(chunk), "fields": CREATIVE_FIELDS_PLAIN}, token)   # modifier syntax not accepted
+    with cf.ThreadPoolExecutor(max_workers=workers) as pool:
+        for body in pool.map(one, chunks):
+            out.update(body)
+            if on_progress: on_progress(len(out))
     return out
 
 def _per_id(token, video_ids, fields, label):

@@ -1,6 +1,6 @@
 """Where ads come from. The pipeline only talks to this interface, so real Meta and the mock are interchangeable."""
 from __future__ import annotations
-from . import config, crypto, meta_client as mc
+from . import cache, config, crypto, meta_client as mc
 from .report import ReportError
 
 class MetaSource:
@@ -22,7 +22,10 @@ class MetaSource:
             rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
                                     on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
             ids = [r["ad_id"] for r in rows]
-            details = mc.pull_ad_details(self.token, ids) if ids else {}
+            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids) if ids else {}      # read in the last day: do not ask Meta again
+            need = [i for i in ids if i not in fresh]
+            details = mc.pull_ad_details(self.token, need,
+                                         on_progress=(lambda n: on_progress(f"Reading creative details: {n} of {len(need)}")) if on_progress else None) if need else {}
         except mc.TokenExpired:
             raise ReportError("Your Meta login expired. Connect Meta again and generate the report.")
         except mc.MetaError as e:
@@ -31,9 +34,9 @@ class MetaSource:
         for r in rows:
             d = details.get(r["ad_id"], {})
             ads.append({
-                "ad_id": r["ad_id"], "ad_name": r.get("ad_name") or d.get("name") or "",
+                "ad_id": r["ad_id"], "ad_name": r.get("ad_name") or d.get("name") or (fresh.get(r["ad_id"]) or {}).get("ad_name") or "",
                 "campaign_id": r.get("campaign_id"), "campaign_name": r.get("campaign_name"),
-                "metrics": mc.metrics_from_insight(r), "creative": mc.creative_info(d),
+                "metrics": mc.metrics_from_insight(r), "creative": fresh[r["ad_id"]] if r["ad_id"] in fresh else mc.creative_info(d),
             })
         return ads
 

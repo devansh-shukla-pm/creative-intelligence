@@ -28,32 +28,49 @@ def window_label():
     m = round(config.WINDOW_DAYS / 30)
     return f"{m} month{'s' if m != 1 else ''}" if m >= 1 else f"{config.WINDOW_DAYS} days"
 
-def _save_creatives(rep, source, ads):
-    conn = rep.conn
-    for a in ads:
-        cache.save_creative(conn, rep.account_id, a["ad_id"], {**a["creative"], "ad_name": a["ad_name"],
-                            "campaign_id": a.get("campaign_id"), "campaign_name": a.get("campaign_name")})
-    have = cache.has_thumb(conn, rep.account_id, [a["ad_id"] for a in ads])      # thumbnails only for ads that do not have one yet
-    need = [a for a in ads if a["ad_id"] not in have]
-    if need:
-        rep.progress("pulling", f"Saving {len(need)} thumbnails")
-        with cf.ThreadPoolExecutor(max_workers=8) as pool:
-            for ad, data in zip(need, pool.map(source.thumbnail, need)):
-                if data: cache.save_thumb(conn, rep.account_id, ad["ad_id"], data)
+def _save_creatives(rep, ads):
+    cache.save_creatives_batch(rep.conn, rep.account_id, [
+        (a["ad_id"], {**a["creative"], "ad_name": a["ad_name"], "campaign_id": a.get("campaign_id"), "campaign_name": a.get("campaign_name")})
+        for a in ads])
+
+_BG = []      # background jobs (thumbnails) that must finish before the report is marked done
+
+def _thumbs_job(account_id, source, ads):
+    """Downloads and stores thumbnails for ads that have none yet. Runs beside the main pipeline on its own connection, so the
+    report never waits for it; the page simply shows thumbnails as they arrive."""
+    try:
+        conn = db.connect()
+        have = cache.has_thumb(conn, account_id, [a["ad_id"] for a in ads])
+        need = [a for a in ads if a["ad_id"] not in have]
+        with cf.ThreadPoolExecutor(max_workers=24) as pool:
+            for i in range(0, len(need), 48):
+                chunk = need[i:i + 48]
+                got = [(ad["ad_id"], d) for ad, d in zip(chunk, pool.map(source.thumbnail, chunk)) if d]
+                if got: cache.save_thumbs_batch(conn, account_id, got)
+        conn.close()
+    except Exception:
+        traceback.print_exc()           # thumbnails are cosmetic: never fail the report over them
+
+def _start_thumbs(rep, source, ads):
+    ex = cf.ThreadPoolExecutor(max_workers=1)
+    _BG.append(ex.submit(_thumbs_job, rep.account_id, source, ads))
 
 def stage_a(rep, source):
     rep.progress("pulling", "Pulling your ads from Meta")
-    ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
-    if not ads:
-        raise ReportError("No ads with spend were found for this account and date range.")
-    prev = source.period_totals(rep, *previous_period(rep))
+    with cf.ThreadPoolExecutor(max_workers=1) as ex:
+        fprev = ex.submit(source.period_totals, rep, *previous_period(rep))        # the trend numbers load while the ads do
+        ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
+        if not ads:
+            raise ReportError("No ads with spend were found for this account and date range.")
+        prev = fprev.result()
     conn = rep.conn
-    _save_creatives(rep, source, ads)
+    _save_creatives(rep, ads)
     cache.save_report_ads(conn, rep.id, ads)
     db.upsert_payload(conn, rep.id, "audit", assemble.audit_rows(ads))
     db.upsert_payload(conn, rep.id, "cmt_ads", assemble.cmt_ads(ads))
     db.upsert_payload(conn, rep.id, "data", assemble.build_data(ads, {}, prev))   # metrics only until classification is done
     rep.signal("a")
+    _start_thumbs(rep, source, ads)
     return ads, prev
 
 def _classify(rep, source, llm, ads, prev=None):
@@ -107,7 +124,8 @@ def stage_window(rep, source, llm, range_ads, range_data):
             db.upsert_payload(rep.conn, rep.id, "insights", [])
             db.upsert_payload(rep.conn, rep.id, "lab", {"meta": {"n_ads": 0}, "products": []})
             rep.signal("c"); rep.signal("d"); return
-        _save_creatives(wrep, source, ads_w)
+        _save_creatives(wrep, ads_w)
+        _start_thumbs(rep, source, ads_w)
         data_w, _ = _classify(wrep, source, llm, ads_w, None)
     with cf.ThreadPoolExecutor(max_workers=2) as pool:        # insights and the Lab are independent: side by side
         fc = pool.submit(lambda: _own_conn(rep.id, "c", llm, data_w, pfx))
@@ -139,6 +157,8 @@ def run(report_id):
         ads, prev = stage_a(rep, source)
         data = stage_b(rep, source, llm, ads, prev)
         stage_window(rep, source, llm, ads, data)
+        for job in _BG: job.result()          # thumbnails still downloading
+        _BG.clear()
         rep.finish()
     except ReportError as e:
         rep.fail(str(e)); print("FAILED:", e, file=sys.stderr); return 1
