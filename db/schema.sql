@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
+-- Insights and the Lab always look at the last WINDOW_DAYS up to today, whatever range the report shows.
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS window_from date;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS window_to   date;
 CREATE INDEX IF NOT EXISTS reports_user_idx ON reports(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS reports_lookup_idx ON reports(user_id, account_id, date_from, date_to);
 

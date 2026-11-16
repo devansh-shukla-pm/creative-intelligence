@@ -4,6 +4,7 @@ Ported from the creative extraction dashboard: batches of 40 processed one after
 memory carried from batch to batch. Ads that already have labels are never sent again.
 """
 from __future__ import annotations
+import concurrent.futures as cf
 import json
 from . import cache, config
 from .llm import LLMError
@@ -196,18 +197,38 @@ def run_clustering(conn, rep, llm, extracted_ads, cached, progress):
 
     batches = [objs[i:i + config.CLUSTER_BATCH] for i in range(0, len(objs), config.CLUSTER_BATCH)]
     done = total - len(new) + len(empty); failed = 0
-    for n, batch in enumerate(batches, 1):
-        progress(f"Grouping similar messages: batch {n} of {len(batches)}", done, total)
-        try:
-            assign, memory, _problems = cluster_batch(llm, batch, memory)
-        except LLMError:
-            failed += 1                                       # these ads stay unlabeled and are retried on the next run
-            continue
+
+    def save(batch, assign):
+        nonlocal done
         for o in batch:
             merged = {**((cached.get(o["ad_id"]) or {}).get("cluster_labels") or {}), **assign.get(o["ad_id"], {})}
             cache.save_cluster_labels(conn, rep.account_id, o["ad_id"], merged)
-        cache.save_cluster_memory(conn, rep.account_id, memory)
         done += len(batch)
+
+    # The first batch runs alone so the label vocabulary exists. After that, batches run side by side (one per API key, up to 4)
+    # from the same starting vocabulary; their vocabularies are merged after each wave.
+    par = max(1, min(4, getattr(llm, "n_keys", 1)))
+    waves = ([batches[:1]] if batches and not any(memory.values()) else []) 
+    rest = batches[len(waves):]
+    waves += [rest[i:i + par] for i in range(0, len(rest), par)]
+    n = 0
+    for wave in waves:
+        n += len(wave)
+        progress(f"Grouping similar messages: batch {n} of {len(batches)}", done, total)
+        results = []
+        if len(wave) == 1:
+            try: results.append((wave[0],) + cluster_batch(llm, wave[0], memory)[:2])
+            except LLMError: failed += 1
+        else:
+            with cf.ThreadPoolExecutor(max_workers=len(wave)) as pool:
+                futs = {pool.submit(cluster_batch, llm, b, memory): b for b in wave}
+                for fut in cf.as_completed(futs):
+                    try: results.append((futs[fut],) + fut.result()[:2])
+                    except LLMError: failed += 1          # these ads stay unlabeled and are retried on the next run
+        for batch, assign, mem in results:
+            memory = _merge_memory(memory, mem)
+            save(batch, assign)
+        cache.save_cluster_memory(conn, rep.account_id, memory)
     if batches and failed == len(batches):
         from .report import ReportError
         raise ReportError("Grouping the ad messages failed. Try again in a few minutes.")

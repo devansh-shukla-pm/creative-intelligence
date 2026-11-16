@@ -37,6 +37,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_KEYS: ${{ secrets.OPENROUTER_API_KEYS }}      # comma separated; calls are spread across them
           META_API_VERSION: ${{ vars.META_API_VERSION }}
           EXTRACTION_MODEL: ${{ vars.EXTRACTION_MODEL }}
           CLUSTER_MODEL: ${{ vars.CLUSTER_MODEL }}

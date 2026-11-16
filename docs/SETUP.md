@@ -77,3 +77,5 @@ These parts talk to Meta and the LLM providers and cannot be tested offline. Che
 - Thumbnails: the request asks Meta for 480px creative thumbnails. If Meta rejects the syntax, the code falls back to the default size.
 - Video extraction: the model reads Meta's short-lived video URL. If it cannot, the ad falls back to its thumbnail and is marked "fallback".
 - Model names on OpenRouter.
+
+Optional GitHub secret `OPENROUTER_API_KEYS`: comma separated list of extra OpenRouter keys. The worker spreads calls across them (and `OPENROUTER_API_KEY`). Optional variable `WINDOW_DAYS` (default 60) sets how many days insights and the Lab look at.

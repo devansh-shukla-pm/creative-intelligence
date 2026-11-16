@@ -11,6 +11,7 @@
     --color-surface-card:#1a1826;
     --color-surface-card-deep:#0f0f15;
     --color-surface-chip:#221f31;
+    --skel-base:#221f31; --skel-hi:rgba(255,255,255,.16);
     --color-surface-chip-hover:#2a2639;
     /* ---- text ---- */
     --color-text-white:#ffffff;
@@ -292,7 +293,8 @@
   .eff2-tname{display:flex;align-items:flex-start;gap:5px;font-size:10.5px;font-weight:700;margin-bottom:8px;min-height:28px;line-height:1.35;}
   .eff2-tname .dot{width:7px;height:7px;border-radius:50%;flex:none;margin-top:3px;}
   .eff2-tspend{font-size:15px;font-weight:700;font-family:var(--font-mono);color:var(--color-text-heading);}
-  .eff2-tsub{font-size:10px;color:var(--color-text-faint);margin-top:3px;}
+  .eff2-tsub{font-size:10.5px;color:var(--color-text-subtle);margin-top:3px;}
+  .eff2-tsub .ad-count-link{color:inherit}
   .eff2-tsignal{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:500;font-style:italic;color:var(--color-text-subtle);margin-top:8px;line-height:1.35;cursor:default;}
   .eff2-tsignal .pip{width:5px;height:5px;border-radius:50%;background:var(--color-status-warning);opacity:.75;flex:none;}
   @media (max-width:1180px){
@@ -359,6 +361,20 @@
 
   /* ================= locked / loading state ================= */
   .load-banner{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--color-text-secondary);background:var(--color-surface-chip);border:1px solid var(--color-border-default);border-radius:var(--radius-pill);padding:8px 15px;white-space:nowrap;align-self:center;}
+  @media (max-width:860px){
+    .page-head{flex-wrap:wrap;align-items:flex-start}
+    .daterange{width:100%}
+    .daterange-row{flex-wrap:wrap}
+    .daterange-row .head-banner{width:100%}
+    .hdr-account{flex:1 1 160px;min-width:0}
+    .hdr-account .xselect-trigger{width:100%;max-width:none}
+    .daterange-trigger{flex:1 1 200px}
+  }
+  .row-50 > *{min-width:0}
+  .hbar-sub{color:var(--color-text-subtle)}
+  @media (max-width:640px){ .hbar-label{width:104px} .hbar-value{width:56px} .hbar-sub{width:36px} .hbar-spend{width:58px} .hbar-row,.hbar-header{gap:6px} }
+  @media (max-width:860px){ .main .donut-row{flex-wrap:wrap;gap:16px} .main .panel{max-width:100%} }
+  @media (max-width:640px){ .main .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .main .panel-head{flex-wrap:wrap} }
   .daterange-row .head-banner{align-self:stretch;width:300px;box-sizing:border-box;padding:0 14px;border-radius:var(--radius-lg);font-size:12.5px;overflow:hidden}
   .daterange-row .head-banner .load-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .load-banner.ready{color:var(--color-status-success);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.08);}
@@ -368,11 +384,20 @@
   .xselect.locked .xselect-trigger{opacity:.45;cursor:not-allowed;}
   .xselect.locked .xselect-trigger:hover{border-color:var(--color-border-default);}
 
-  .skel{position:relative;overflow:hidden;background:var(--color-surface-chip);}
+  .skel{position:relative;overflow:hidden;background:var(--skel-base);}
   .skel::after{content:'';position:absolute;inset:0;transform:translateX(-100%);
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+    background:linear-gradient(90deg, transparent, var(--skel-hi), transparent);
     animation:skel-sweep 1.6s ease-in-out infinite;}
   @keyframes skel-sweep{100%{transform:translateX(100%);}}
+  .ins-msgs{position:relative;height:22px;margin:2px 0 4px}
+  .ins-msgs span{position:absolute;left:0;top:0;font-size:14px;font-weight:600;color:var(--color-text-heading);opacity:0;animation:insMsg 21s ease-in-out infinite;animation-delay:calc(var(--i) * 3s);white-space:nowrap}
+  .ins-msgs span:first-child{opacity:1}
+  @keyframes insMsg{0%{opacity:0;transform:translateY(6px)}2.5%,12%{opacity:1;transform:none}14.3%,100%{opacity:0;transform:translateY(-6px)}}
+  .ins-pane-load{position:relative;height:300px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+  .ins-pane-load .ins-core{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 22px;border-radius:14px;background:var(--color-surface-card);border:1px solid var(--color-border-default);box-shadow:0 8px 24px rgba(15,15,25,.10)}
+  .ins-pane-load .ins-core .ctx-spin{width:26px;height:26px}
+  .ins-pane-load .ins-core small{font-size:12px;color:var(--color-text-subtle)}
+  @media (prefers-reduced-motion:reduce){.ins-msgs span{animation:none}.ins-msgs span:first-child{opacity:1}}
   .ctx-loader{flex:1;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
   .ctx-spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--color-border-default);border-top-color:var(--color-accent);animation:cre-spin .8s linear infinite;}
   .ctx-msgs{position:relative;height:20px;width:100%;text-align:center;}
@@ -519,7 +544,7 @@
   .hm-cell.filled b{color:inherit;}
   .hm-cell.filled span{color:inherit;opacity:.72;}
   .hm-cell.filled:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);}
-  .hm-cell.insufficient{background:var(--color-surface-chip);border:1px dashed var(--color-border-strong);color:var(--color-text-faint);font-size:14px;}
+  .hm-cell.insufficient{background:var(--color-surface-chip);border:1px dashed var(--color-border-strong);color:var(--color-text-subtle);font-size:14px;}
   .hm-empty{padding:20px;text-align:center;color:var(--color-text-faint);font-size:12px;}
   .hm-legend{margin-top:var(--sp-4);}
   .hm-legend-gradient{width:120px;height:8px;border-radius:5px;background:linear-gradient(90deg,#F8EFFF,#DD83F5,#733EE0);}
@@ -534,7 +559,7 @@
   .ia3d-stage::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
     box-shadow:inset 0 0 90px rgba(0,0,0,.55);}
   .ia3d-stage.dragging{cursor:grabbing;}
-  .ia3d-hint{position:absolute;top:14px;right:16px;font-size:11px;color:var(--color-text-faint);background:rgba(15,15,21,.7);border:1px solid var(--color-border-default);border-radius:999px;padding:5px 11px;pointer-events:none;z-index:3;}
+  .ia3d-hint{position:absolute;top:14px;right:16px;font-size:11px;color:var(--color-text-muted);background:rgba(15,15,21,.7);border:1px solid var(--color-border-default);border-radius:999px;padding:5px 11px;pointer-events:none;z-index:3;}
   .ia3d-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:1400px;}
   .ia3d-world{position:relative;transform-style:preserve-3d;will-change:transform;}
   .ia3d-cube{position:absolute;transform-style:preserve-3d;top:0;left:0;pointer-events:auto;
@@ -1285,8 +1310,9 @@
     /* warm light palette (design-system tokens: --bg #fbf5f0, --bg-alt #f5eee9, ink #16151f, coral accent) */
     --color-surface-page:#fbf5f0; --color-surface-card:#ffffff; --color-surface-card-deep:#f5eee9;
     --color-surface-chip:#f3ece6; --color-surface-chip-hover:#ebe3dd;
-    --color-text-white:#ffffff; --color-text-heading:#16151f; --color-text-secondary:rgba(22,21,31,.70); --color-text-muted:rgba(22,21,31,.55);
-    --color-text-subtle:rgba(22,21,31,.50); --color-text-faint:rgba(22,21,31,.35); --color-text-accent:#d4574a;
+    --skel-base:#ebe2da; --skel-hi:rgba(255,255,255,.95);   /* visible on both the white cards and the warm page */
+    --color-text-white:#ffffff; --color-text-heading:#16151f; --color-text-secondary:rgba(22,21,31,.72); --color-text-muted:rgba(22,21,31,.64);
+    --color-text-subtle:rgba(22,21,31,.60); --color-text-faint:rgba(22,21,31,.46);   /* raised so small labels clear 4.5:1 on the warm page */ --color-text-accent:#d4574a;
     --color-border-default:rgba(15,15,25,.10); --color-border-subtle:rgba(15,15,25,.06); --color-border-strong:rgba(15,15,25,.15);
     --color-border-purple:#ec7c6f; --color-accent:#ec7c6f; --color-accent-soft:rgba(236,124,111,.14);
     --gradient-primary:linear-gradient(135deg,#e0604f,#e8806c,#ee9578);   /* design-system coral gradient, deepened one step so white button text stays legible */
@@ -1342,6 +1368,7 @@
   :root[data-theme="light"] #clReset{color:#c2493c}
   :root[data-theme="light"] #clReset:hover{color:var(--color-text-heading)}
   :root[data-theme="light"] .ia3d-hint{background:#fff}
+  :root[data-theme="light"] .nav-item .beta{color:#b8453a}
   :root[data-theme="light"] .ia3d-tick.x{color:#c2493c}
   :root[data-theme="light"] .ia3d-tick.y{color:#d43939}
   :root[data-theme="light"] .ia3d-tick.z{color:#c2493c}
@@ -1899,7 +1926,7 @@
   .status-err button{border:none;cursor:pointer;font:700 12px var(--font-primary);color:#fff;background:var(--gradient-primary);border-radius:var(--radius-md);padding:8px 14px}
   .user-box{display:inline-flex;align-items:center;gap:8px;height:30px;box-sizing:border-box;margin-left:auto;padding:0 4px 0 4px;border:1px solid var(--color-border-default);border-radius:var(--radius-pill);background:var(--color-surface-card);font-size:12px;font-weight:500;color:var(--color-text-secondary);white-space:nowrap}
   .user-box:empty{display:none}
-  .user-box .u-av{width:22px;height:22px;border-radius:50%;background:var(--color-accent-soft);color:var(--color-text-accent);display:flex;align-items:center;justify-content:center;font:700 11px var(--font-primary);text-transform:uppercase}
+  .user-box .u-av{width:22px;height:22px;border-radius:50%;background:var(--color-accent-soft);color:var(--color-text-heading);display:flex;align-items:center;justify-content:center;font:700 11px var(--font-primary);text-transform:uppercase}
   .user-box .u-sep{width:1px;height:14px;background:var(--color-border-default)}
   .user-box button{border:none;background:none;cursor:pointer;color:var(--color-text-subtle);font:500 12px var(--font-primary);padding:0 10px 0 0;height:100%;transition:color .15s}
   .user-box button:hover{color:var(--color-status-error)}
@@ -2077,6 +2104,7 @@ const state = {
   stageFocus:'problem-statement',
   sidebarCollapsed:false,
   dataReady:false, // flips true once the (simulated) AI-report pipeline fully finishes; gates the SKU pill + the two Creative Stage Overview charts
+  winFrom:null, winTo:null,
   sigA:false, sigB:false, sigC:false, sigD:false, // backend signals (PRD 1 section 4.3): A Meta data, B classification, C insights, D Lab
   reportStatus:null, reportError:null, progressMsg:'',
   broadLoading:true, // true only for the first 3s of a load cycle; blankets everything below the config bar in a generic skeleton
@@ -2825,6 +2853,11 @@ function wireConfigBarOnly(){
   };
 }
 
+function windowLabel(){
+  if(!state.winFrom) return 'your last 2 months';
+  const f = d=>new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  return `your last 2 months (${f(state.winFrom)} to ${f(state.winTo)})`;
+}
 function isLoading(){ return LIVE ? (state.reportStatus!=='failed' && !(state.sigA&&state.sigB&&state.sigC&&state.sigD)) : !state.dataReady; }
 let ACCOUNTS = [];
 function accountOptionsList(){
@@ -4154,12 +4187,15 @@ const inBtn = c => `<button type="button" class="insight-cta in-cta" data-insigh
 const inLink = c => (c.ad_ids&&c.ad_ids.length) ? `<span class="ad-count-link in-link" data-ad-ids="${esc(c.ad_ids.join(','))}" data-filter-label="${esc(c.link_label||'')}">See the ${fmtNum(c.ad_ids.length)} ads behind this</span>` : '';
 const inChip = c => `<span class="in-chip ${(c.source_type==='stop'||c.source_type==='funnel_leak')?'warn':''}">${esc(c.tag||IN_LABEL[c.source_type]||'Insight')}</span>`;
 const inNum = i => `<span class="in-num">${i+1}</span>`;
+const INS_LOAD_MSGS = ['Generating insights','Seeing beneath the data points','Finding synergies between creative choices','Checking every number against your data','Ranking what is worth acting on','Writing it up in plain language','Looking for what your best ads share'];
 function insightSkeleton(){
+  const win = state.winFrom ? ` for ${windowLabel()}` : '';
   return `<div class="in-hero ins-live"><div class="in-grid b">
     <div class="in-left"><span class="rc-tag"><i></i>Reading your numbers</span>
       <h2 class="rc-title">Finding what is <span>worth acting on</span></h2>
+      <div class="ins-msgs" aria-live="polite">${INS_LOAD_MSGS.map((m,i)=>`<span style="--i:${i}">${esc(m)}${i===0?'':''}</span>`).join('')}</div>
       <div class="in-tabs">${[0,1,2,3].map(()=>`<div class="skel" style="height:64px;border-radius:12px"></div>`).join('')}</div></div>
-    <div class="rc-card in-pane"><div class="skel" style="height:300px;border-radius:12px"></div></div></div></div>`;
+    <div class="rc-card in-pane"><div class="ins-pane-load skel"><div class="ins-core"><span class="ctx-spin"></span><small>${esc(state.progressMsg ? state.progressMsg.replace(/^Processing [^·]*· /,'') : 'Working on it')}${esc(win)}</small></div></div></div></div></div>`;
 }
 function renderIaInsightCards(){
   if(!state.sigC) return insightSkeleton();
@@ -4175,7 +4211,7 @@ function renderIaInsightCards(){
     <div class="in-left"><span class="rc-tag"><i></i>Found in your own data</span>
       <h2 class="rc-title">${list.length} insights <span>worth acting on</span></h2>
       <div class="in-tabs" role="tablist" aria-label="Insights">${list.map((c,i)=>`<button type="button" role="tab" aria-selected="${i===IN_SEL}" class="in-tab ${i===IN_SEL?'on':''}" data-tab="${i}">${inNum(i)}<span>${esc(c.headline)}</span></button>`).join('')}</div>
-      <div class="in-hint">${ic('eye',13)}Click any insight to open its details</div></div>
+      <div class="in-hint">${ic('eye',13)}Click any insight to open its details</div>${LIVE&&state.winFrom?`<div class="in-hint" style="margin-top:6px">Based on ${esc(windowLabel())}</div>`:''}</div>
     <div class="rc-card in-pane">${list.map(detail).join('')}</div></div></div>`;
 }
 function wireInsightPicker(root){
@@ -7803,7 +7839,7 @@ function lzHero(){
     <div class="rc-left">
       <span class="rc-tag"><i></i>Recipe engine</span>
       <h2 class="rc-title">Your best ad hasn't been made yet. <span>Your data already knows how.</span></h2>
-      <p class="rc-copy">We have read ${ELIG.length} of your ads and ${fmtINR(ELIG_SPEND)} of spend. Pick a product and we will score every supported angle combination to build the one ad recipe your data says should beat your average.</p>
+      <p class="rc-copy">We have read ${ELIG.length} of your ads and ${fmtINR(ELIG_SPEND)} of spend${LIVE&&state.winFrom?` from ${esc(windowLabel())}`:''}. Pick a product and we will score every supported angle combination to build the one ad recipe your data says should beat your average.</p>
       <div class="zl-pick">
         <div class="zl-sel xselect ${LZ.open?'open':''}" id="zSel"><div class="xselect-trigger ${p?'':'empty'}" id="zTrig"><span class="tlabel">${p?esc(p.name):(READY.length?'Choose a product':'No product is ready yet')}</span>${ic('sortDesc',13)}</div>
           <div class="xselect-panel"><div class="xselect-list">${opts}</div><div class="xselect-foot">${READY.length} of ${DATA.skus.length} products are ready. A product needs enough ads and spend, and angles tested in every stage, to get a recipe.</div></div></div>
@@ -7898,6 +7934,7 @@ return {
 })();
 let __prevPage = null;
 
+window.__ci = { get state(){ return state; }, render: ()=>render() };   // lets design checks put the page into any loading state
 function render(){
   if(state.page==='insights-actionables' && !state.sigB) state.page='creative-overview';
   if(state.page==='experimentation-lab' && !state.sigD) state.page='creative-overview';
@@ -8015,6 +8052,7 @@ function applyBoot(b){
   if(g.a && !state.loadPhaseStart) state.loadPhaseStart = Date.now();
   state.reportStatus = b.report.status; state.reportError = b.error || null;
   state.progressMsg = (b.progress && b.progress.message) || '';
+  state.winFrom = b.report.window_from || null; state.winTo = b.report.window_to || null;
   return before !== [state.sigA,state.sigB,state.sigC,state.sigD].join();
 }
 async function pollOnce(){

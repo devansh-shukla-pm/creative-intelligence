@@ -62,3 +62,15 @@ def save_report_ads(conn, report_id, ads):
             """INSERT INTO report_ads (report_id, ad_id, metrics) VALUES (%s,%s,%s)
                ON CONFLICT (report_id, ad_id) DO UPDATE SET metrics=EXCLUDED.metrics""",
             [(report_id, a["ad_id"], db.J(a["metrics"])) for a in ads])
+
+
+def reuse_window_results(conn, rep, wfrom, wto):
+    """Insights and Lab for the same user, account and window already built today: copy them instead of recomputing."""
+    r = conn.execute("""SELECT id FROM reports WHERE user_id=%s AND account_id=%s AND window_from=%s AND window_to=%s
+                          AND signal_c IS NOT NULL AND signal_d IS NOT NULL AND id <> %s::uuid
+                        ORDER BY created_at DESC LIMIT 1""", (rep.user_id, rep.account_id, wfrom, wto, rep.id)).fetchone()
+    if not r: return False
+    conn.execute("""INSERT INTO report_payloads (report_id, kind, body)
+                    SELECT %s::uuid, kind, body FROM report_payloads WHERE report_id=%s AND kind IN ('insights','lab')
+                    ON CONFLICT (report_id, kind) DO UPDATE SET body = EXCLUDED.body, updated_at = now()""", (rep.id, r["id"]))
+    return True

@@ -4,7 +4,7 @@ Runs the whole pipeline for one report, setting each signal as soon as its piece
 Safe to re-run: every step reads the caches first.
 """
 from __future__ import annotations
-import argparse, datetime, sys, traceback, concurrent.futures as cf
+import argparse, dataclasses, datetime, sys, traceback, concurrent.futures as cf
 from . import config, db, cache
 from .report import Report, ReportError
 from .llm import get_llm
@@ -19,6 +19,28 @@ def previous_period(rep):
     pb = a - datetime.timedelta(days=1)
     return (pb - datetime.timedelta(days=n - 1)).isoformat(), pb.isoformat()
 
+def window_range():
+    """The last WINDOW_DAYS up to today: what insights and the Lab always run on."""
+    today = datetime.date.today()
+    return (today - datetime.timedelta(days=config.WINDOW_DAYS - 1)).isoformat(), today.isoformat()
+
+def window_label():
+    m = round(config.WINDOW_DAYS / 30)
+    return f"{m} month{'s' if m != 1 else ''}" if m >= 1 else f"{config.WINDOW_DAYS} days"
+
+def _save_creatives(rep, source, ads):
+    conn = rep.conn
+    for a in ads:
+        cache.save_creative(conn, rep.account_id, a["ad_id"], {**a["creative"], "ad_name": a["ad_name"],
+                            "campaign_id": a.get("campaign_id"), "campaign_name": a.get("campaign_name")})
+    have = cache.has_thumb(conn, rep.account_id, [a["ad_id"] for a in ads])      # thumbnails only for ads that do not have one yet
+    need = [a for a in ads if a["ad_id"] not in have]
+    if need:
+        rep.progress("pulling", f"Saving {len(need)} thumbnails")
+        with cf.ThreadPoolExecutor(max_workers=8) as pool:
+            for ad, data in zip(need, pool.map(source.thumbnail, need)):
+                if data: cache.save_thumb(conn, rep.account_id, ad["ad_id"], data)
+
 def stage_a(rep, source):
     rep.progress("pulling", "Pulling your ads from Meta")
     ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
@@ -26,17 +48,7 @@ def stage_a(rep, source):
         raise ReportError("No ads with spend were found for this account and date range.")
     prev = source.period_totals(rep, *previous_period(rep))
     conn = rep.conn
-    for a in ads:
-        cache.save_creative(conn, rep.account_id, a["ad_id"], {**a["creative"], "ad_name": a["ad_name"],
-                            "campaign_id": a.get("campaign_id"), "campaign_name": a.get("campaign_name")})
-    # thumbnails: only for ads that do not have one yet
-    have = cache.has_thumb(conn, rep.account_id, [a["ad_id"] for a in ads])
-    need = [a for a in ads if a["ad_id"] not in have]
-    if need:
-        rep.progress("pulling", f"Saving {len(need)} thumbnails")
-        with cf.ThreadPoolExecutor(max_workers=8) as pool:
-            for ad, data in zip(need, pool.map(source.thumbnail, need)):
-                if data: cache.save_thumb(conn, rep.account_id, ad["ad_id"], data)
+    _save_creatives(rep, source, ads)
     cache.save_report_ads(conn, rep.id, ads)
     db.upsert_payload(conn, rep.id, "audit", assemble.audit_rows(ads))
     db.upsert_payload(conn, rep.id, "cmt_ads", assemble.cmt_ads(ads))
@@ -44,7 +56,8 @@ def stage_a(rep, source):
     rep.signal("a")
     return ads, prev
 
-def stage_b(rep, source, llm, ads, prev=None):
+def _classify(rep, source, llm, ads, prev=None):
+    """Read, group and name the ads, then assemble the datasets. Writes nothing the page shows; returns (data, classified)."""
     conn = rep.conn
     ids = [a["ad_id"] for a in ads]
     cached = cache.load_cache(conn, rep.account_id, ids)
@@ -67,11 +80,41 @@ def stage_b(rep, source, llm, ads, prev=None):
     rep.progress("assembling", "Putting your report together")
     classified = {i: {"extraction": cached[i].get("extraction"), "labels": cached[i].get("cluster_labels"), "product": cached[i].get("product")}
                   for i in ids if cached.get(i) and cached[i].get("extraction")}
-    data = assemble.build_data(ads, classified, prev)
-    db.upsert_payload(conn, rep.id, "cmt_dims", assemble.build_cmt_dims(ads, classified))
-    db.upsert_payload(conn, rep.id, "data", data)
+    return assemble.build_data(ads, classified, prev), classified
+
+def stage_b(rep, source, llm, ads, prev=None):
+    data, classified = _classify(rep, source, llm, ads, prev)
+    db.upsert_payload(rep.conn, rep.id, "cmt_dims", assemble.build_cmt_dims(ads, classified))
+    db.upsert_payload(rep.conn, rep.id, "data", data)
     rep.signal("b")
     return data
+
+def stage_window(rep, source, llm, range_ads, range_data):
+    """Insights and the Lab run on the last WINDOW_DAYS up to today, whatever range the report shows. Ads already read for the
+    range (or for an earlier report) come from the cache, so only newer ads cost model calls."""
+    wf, wt = window_range()
+    pfx = f"Processing {window_label()} of data · "
+    wrep = dataclasses.replace(rep, date_from=wf, date_to=wt, prefix=pfx)
+    rep.conn.execute("UPDATE reports SET window_from=%s, window_to=%s WHERE id=%s", (wf, wt, rep.id))
+    if cache.reuse_window_results(rep.conn, rep, wf, wt):
+        rep.signal("c"); rep.signal("d"); return
+    if (rep.date_from, rep.date_to) == (wf, wt):
+        data_w = range_data
+    else:
+        wrep.progress("pulling", "Pulling your ads from Meta")
+        ads_w = source.fetch_ads(wrep, on_progress=lambda m: wrep.progress("pulling", m))
+        if not ads_w:
+            db.upsert_payload(rep.conn, rep.id, "insights", [])
+            db.upsert_payload(rep.conn, rep.id, "lab", {"meta": {"n_ads": 0}, "products": []})
+            rep.signal("c"); rep.signal("d"); return
+        _save_creatives(wrep, source, ads_w)
+        data_w, _ = _classify(wrep, source, llm, ads_w, None)
+    with cf.ThreadPoolExecutor(max_workers=2) as pool:        # insights and the Lab are independent: side by side
+        fc = pool.submit(lambda: _own_conn(rep.id, "c", llm, data_w, pfx))
+        fd = pool.submit(lambda: _own_conn(rep.id, "d", llm, data_w, pfx))
+        errs = [f.exception() for f in (fc, fd) if f.exception()]
+    if errs:
+        raise errs[0]
 
 def stage_c(rep, llm, data):
     rep.progress("insights", "Finding what is worth acting on")
@@ -95,13 +138,7 @@ def run(report_id):
         llm = get_llm(); source = get_source(rep)
         ads, prev = stage_a(rep, source)
         data = stage_b(rep, source, llm, ads, prev)
-        # insights and the Lab are independent: run them side by side
-        with cf.ThreadPoolExecutor(max_workers=2) as pool:
-            fc = pool.submit(lambda: _own_conn(report_id, "c", llm, data))
-            fd = pool.submit(lambda: _own_conn(report_id, "d", llm, data))
-            errs = [f.exception() for f in (fc, fd) if f.exception()]
-        if errs:
-            raise errs[0]
+        stage_window(rep, source, llm, ads, data)
         rep.finish()
     except ReportError as e:
         rep.fail(str(e)); print("FAILED:", e, file=sys.stderr); return 1
@@ -111,9 +148,9 @@ def run(report_id):
         return 1
     return 0
 
-def _own_conn(report_id, which, llm, data):
+def _own_conn(report_id, which, llm, data, prefix=""):
     """Each parallel stage uses its own database connection."""
-    conn = db.connect(); rep = Report.load(conn, report_id)
+    conn = db.connect(); rep = dataclasses.replace(Report.load(conn, report_id), prefix=prefix)
     if which == "c": stage_c(rep, llm, data)
     else: stage_d(rep, data)
 

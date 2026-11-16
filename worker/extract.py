@@ -79,7 +79,8 @@ def run_extraction(conn, rep, llm, source, ads, cached, progress):
     def work(ad):
         return extract_one(llm, ad, video_urls.get(ad["ad_id"]), frames.get(ad["ad_id"]))
 
-    with cf.ThreadPoolExecutor(max_workers=config.EXTRACT_CONCURRENCY) as pool:
+    workers = config.EXTRACT_CONCURRENCY or 12 * getattr(llm, "n_keys", 1)
+    with cf.ThreadPoolExecutor(max_workers=workers) as pool:
         futs = {pool.submit(work, a): a for a in todo}
         for fut in cf.as_completed(futs):
             ad = futs[fut]

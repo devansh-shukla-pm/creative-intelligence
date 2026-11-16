@@ -66,3 +66,9 @@ The hosted site never contains demo data (`.vercelignore` plus a test).
 - Optional allowlist of Meta user ids (`ALLOWED_META_USER_IDS`). In Meta's Development mode only app roles can log in anyway.
 - Per-user limits on report creation protect LLM spend.
 - Secrets live in Vercel and GitHub environment variables, never in the repo.
+
+## Insights and Lab window
+The report page shows the range the user picked, but insights and the Lab always use the last `WINDOW_DAYS` (60) up to today. After signal B the worker calls `stage_window`: it pulls that window from Meta (aggregates are cheap), reads only ads not yet in `ad_cache`, groups and names them, then builds insights (signal C) and the Lab (signal D) from that dataset. `reports.window_from/window_to` tell the page which dates they cover. If the same user already finished the same account and window today, the finished payloads are copied (`cache.reuse_window_results`).
+
+## API keys
+`OPENROUTER_API_KEYS` (comma separated) plus `OPENROUTER_API_KEY`. `worker/llm.py` rotates keys per call, rests a key for 20 s on HTTP 429 and drops a key that returns 401, 402 or 403 while others remain.

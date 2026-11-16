@@ -16,6 +16,8 @@ def _b(name: str, default: str = "") -> bool:
 DATABASE_URL = _env("DATABASE_URL", "")
 ENCRYPTION_KEY = _env("ENCRYPTION_KEY", "")          # same key the API uses to encrypt Meta tokens
 OPENROUTER_API_KEY = _env("OPENROUTER_API_KEY", "")
+# Several keys spread the parallel calls and fail over when one is rate limited: OPENROUTER_API_KEYS="k1,k2,k3" (plus OPENROUTER_API_KEY)
+OPENROUTER_API_KEYS = list(dict.fromkeys(k.strip() for k in (_env("OPENROUTER_API_KEYS", "").split(",") + [OPENROUTER_API_KEY]) if k.strip()))
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Models (same choices as the creative extraction dashboard; override per environment)
@@ -28,7 +30,8 @@ META_API_VERSION = _env("META_API_VERSION", "v23.0")
 MOCK_META = _b("MOCK_META")        # fixture ads instead of Meta
 MOCK_LLM = _b("MOCK_LLM")          # deterministic fake LLM, no API key needed
 
-EXTRACT_CONCURRENCY = int(_env("EXTRACT_CONCURRENCY", "16"))
+EXTRACT_CONCURRENCY = int(_env("EXTRACT_CONCURRENCY", "0"))       # 0 = auto: 12 parallel reads per API key
+WINDOW_DAYS = int(_env("WINDOW_DAYS", "60"))                      # insights and the Lab always look at this many days up to today
 EXTRACT_ATTEMPTS = int(_env("EXTRACT_ATTEMPTS", "3"))   # per ad across runs, then marked failed
 CLUSTER_BATCH = int(_env("CLUSTER_BATCH", "40"))
 LLM_TIMEOUT_S = int(_env("LLM_TIMEOUT_S", "120"))

@@ -16,6 +16,7 @@ class Report:
     currency: str
     date_from: str
     date_to: str
+    prefix: str = ""                 # added to every progress message ("Processing 2 months of data · ")
 
     @classmethod
     def load(cls, conn, report_id):
@@ -30,7 +31,7 @@ class Report:
         self.conn.execute("UPDATE reports SET status='running', error=NULL, heartbeat_at=now(), updated_at=now() WHERE id=%s", (self.id,))
 
     def progress(self, stage, message, done=None, total=None):
-        p = {"message": message}
+        p = {"message": self.prefix + message}
         if done is not None: p["done"] = done
         if total is not None: p["total"] = total
         self.conn.execute(
