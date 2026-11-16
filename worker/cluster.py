@@ -155,8 +155,10 @@ def cluster_batch(llm, batch, memory):
         mem = _merge_memory(mem, {f: [c.get("cluster_label") for c in (fd or {}).get("clusters", [])]})
 
     # The model sometimes skips a whole field. Ask again for just those fields, once.
-    skipped = [f for f in FREE_TEXT_FIELDS
-               if any(a.get(f) and f not in assign.get(a["ad_id"], {}) for a in batch)]
+    def _coverage(f):
+        want = [a for a in batch if a.get(f)]
+        return (sum(1 for a in want if f in assign.get(a["ad_id"], {})) / len(want)) if want else 1.0
+    skipped = [f for f in FREE_TEXT_FIELDS if _coverage(f) < 0.6]     # a few dropped ids are fine; a mostly skipped field is retried
     if skipped:
         sub = [{**{k: a.get(k) if (k == "ad_id" or k in skipped) else None for k in a}} for a in batch]
         try:

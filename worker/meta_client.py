@@ -194,6 +194,26 @@ def pull_video_frames(token, video_ids):
         out[vid] = uris
     return out
 
+def pull_account_videos(token, account_id, wanted_ids, max_pages=40):
+    """Videos owned by the ad account itself. Needs only ads_read (no Page access), so it works when the per-video lookup is refused.
+    Stops as soon as every wanted id has been seen."""
+    wanted = set(map(str, wanted_ids)); found = {}
+    params = {"fields": "source,picture,length,thumbnails{uri,is_preferred}", "limit": 100}
+    try:
+        body = _get(f"{GRAPH}/act_{account_id}/advideos", params, token)
+        for _ in range(max_pages):
+            for v in body.get("data", []):
+                if str(v.get("id")) in wanted: found[str(v["id"])] = v
+            nxt = (body.get("paging") or {}).get("next")
+            if not nxt or len(found) >= len(wanted): break
+            body = _get(nxt, None, None)
+    except TokenExpired:
+        raise
+    except MetaError as e:
+        print(f"[meta] account videos failed: {e}", flush=True)
+    print(f"[meta] account videos: found {len(found)} of {len(wanted)} wanted", flush=True)
+    return found
+
 def creative_info(detail: dict) -> dict:
     """Flatten Meta's creative object into what we keep per ad."""
     cr = detail.get("creative") or {}

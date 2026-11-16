@@ -17,7 +17,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 240
     env:
       REPORT_ID: ${{ github.event.client_payload.report_id || inputs.report_id }}
     steps:

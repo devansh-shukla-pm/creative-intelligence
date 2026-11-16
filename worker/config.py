@@ -28,7 +28,7 @@ META_API_VERSION = _env("META_API_VERSION", "v23.0")
 MOCK_META = _b("MOCK_META")        # fixture ads instead of Meta
 MOCK_LLM = _b("MOCK_LLM")          # deterministic fake LLM, no API key needed
 
-EXTRACT_CONCURRENCY = int(_env("EXTRACT_CONCURRENCY", "6"))
+EXTRACT_CONCURRENCY = int(_env("EXTRACT_CONCURRENCY", "16"))
 EXTRACT_ATTEMPTS = int(_env("EXTRACT_ATTEMPTS", "3"))   # per ad across runs, then marked failed
 CLUSTER_BATCH = int(_env("CLUSTER_BATCH", "40"))
 LLM_TIMEOUT_S = int(_env("LLM_TIMEOUT_S", "120"))
