@@ -18,9 +18,9 @@ INSIGHT_FIELDS = ("ad_id,ad_name,campaign_id,campaign_name,adset_id,adset_name,s
                   "clicks,inline_link_clicks,actions,action_values")
 CREATIVE_FIELDS = ("id,name,effective_status,preview_shareable_link,"
                    "creative.thumbnail_width(480).thumbnail_height(480){id,thumbnail_url,image_url,video_id,"
-                   "object_story_spec,asset_feed_spec}")
+                   "body,title,call_to_action_type,object_story_spec,asset_feed_spec}")
 CREATIVE_FIELDS_PLAIN = ("id,name,effective_status,preview_shareable_link,"
-                         "creative{id,thumbnail_url,image_url,video_id,object_story_spec,asset_feed_spec}")
+                         "creative{id,thumbnail_url,image_url,video_id,body,title,call_to_action_type,object_story_spec,asset_feed_spec}")
 
 class MetaError(Exception):
     def __init__(self, msg, code=None, status=None):
@@ -214,6 +214,27 @@ def pull_account_videos(token, account_id, wanted_ids, max_pages=40):
     print(f"[meta] account videos: found {len(found)} of {len(wanted)} wanted", flush=True)
     return found
 
+def ad_copy(cr: dict) -> dict:
+    """Primary text, headline, description and CTA button type as set in Ads Manager. Needs only ads_read, so it is available
+    even when Meta will not hand over the video file."""
+    oss = cr.get("object_story_spec") or {}
+    afs = cr.get("asset_feed_spec") or {}
+    vd, ld = oss.get("video_data") or {}, oss.get("link_data") or {}
+    def first(*vals):
+        for v in vals:
+            if isinstance(v, list): v = next((x.get("text") if isinstance(x, dict) else x for x in v if x), None)
+            if isinstance(v, str) and v.strip(): return v.strip()
+        return None
+    cta = first((vd.get("call_to_action") or {}).get("type"), (ld.get("call_to_action") or {}).get("type"),
+                cr.get("call_to_action_type"), afs.get("call_to_action_types"))
+    out = {
+        "primary_text": first(vd.get("message"), ld.get("message"), cr.get("body"), afs.get("bodies")),
+        "headline": first(vd.get("title"), ld.get("name"), cr.get("title"), afs.get("titles")),
+        "description": first(vd.get("link_description"), ld.get("description"), afs.get("descriptions")),
+        "cta_button": cta.replace("_", " ").title() if cta else None,
+    }
+    return {k: v for k, v in out.items() if v}
+
 def creative_info(detail: dict) -> dict:
     """Flatten Meta's creative object into what we keep per ad."""
     cr = detail.get("creative") or {}
@@ -230,6 +251,7 @@ def creative_info(detail: dict) -> dict:
     image_url = cr.get("image_url") or link.get("picture") or (oss.get("photo_data") or {}).get("url") or \
         next((i.get("url") for i in (afs.get("images") or []) if i.get("url")), None)
     return {
+        "copy": ad_copy(cr),
         "creative_id": cr.get("id"), "media_type": media, "video_id": video_id,
         "image_url": image_url, "thumbnail_url": cr.get("thumbnail_url"),
         "carousel_urls": slides if media == "CAROUSEL" else [],

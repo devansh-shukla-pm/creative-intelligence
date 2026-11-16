@@ -130,3 +130,13 @@ def test_assemble_data_shape_matches_what_the_ui_reads():
     assert build_cmt_dims([ad], cl)["STORYTELLING_STYLE"][0]["label"] == "Product demo"
     # unclassified ads stay in the data so totals never change between signals
     assert len(build_data([ad], {})["ads"]) == 1 and build_data([ad], {})["ads"][0]["skus"] == []
+
+
+def test_ad_copy_from_creative():
+    from worker.meta_client import ad_copy
+    cr = {"call_to_action_type": "SHOP_NOW",
+          "object_story_spec": {"video_data": {"message": "Grey hair gone in 5 min", "title": "Root Touch Up"}}}
+    assert ad_copy(cr) == {"primary_text": "Grey hair gone in 5 min", "headline": "Root Touch Up", "cta_button": "Shop Now"}
+    feed = {"asset_feed_spec": {"bodies": [{"text": "B1"}], "titles": [{"text": "T1"}], "call_to_action_types": ["LEARN_MORE"]}}
+    assert ad_copy(feed) == {"primary_text": "B1", "headline": "T1", "cta_button": "Learn More"}
+    assert ad_copy({}) == {}

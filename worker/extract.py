@@ -14,10 +14,21 @@ DONE = ("ok", "fallback", "skipped", "failed")
 def _image_parts(urls):
     return [{"type": "image_url", "image_url": {"url": u}} for u in urls if u]
 
+def _copy_part(c):
+    """Meta's own ad copy and CTA button, sent as extra context. For video we cannot watch it is the best evidence of the pitch."""
+    cp = c.get("copy") or {}
+    if not cp: return []
+    lines = [f"- {label}: {cp[k]}" for k, label in (("primary_text", "Primary text"), ("headline", "Headline"),
+                                                    ("description", "Description"), ("cta_button", "CTA button")) if cp.get(k)]
+    note = ("\n\nMETA AD COPY (set in Ads Manager, not necessarily shown on screen):\n" + "\n".join(lines) +
+            "\nUse it as supporting evidence. If the closing call to action is not visible in the creative, use the CTA button as cta_text. "
+            "Never copy it into a field the creative itself does not support.")
+    return [{"type": "text", "text": note}]
+
 def extract_one(llm, ad, video_url=None, frames=None):
     """-> (extraction dict, used_fallback). Raises if there is nothing usable to send or the model keeps failing."""
     c = ad["creative"]
-    prompt = [{"type": "text", "text": extraction_prompt()}]
+    prompt = [{"type": "text", "text": extraction_prompt()}] + _copy_part(c)
     is_video = c.get("media_type") == "VIDEO"
     fallback = False
 
