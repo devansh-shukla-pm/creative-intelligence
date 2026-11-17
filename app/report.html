@@ -375,8 +375,12 @@
   @media (max-width:640px){ .hbar-label{width:104px} .hbar-value{width:56px} .hbar-sub{width:36px} .hbar-spend{width:58px} .hbar-row,.hbar-header{gap:6px} }
   @media (max-width:860px){ .main .donut-row{flex-wrap:wrap;gap:16px} .main .panel{max-width:100%} }
   @media (max-width:640px){ .main .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .main .panel-head{flex-wrap:wrap} }
-  .daterange-row .head-banner{align-self:stretch;width:300px;box-sizing:border-box;padding:0 14px;border-radius:var(--radius-lg);font-size:12.5px;overflow:hidden}
-  .daterange-row .head-banner .load-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .daterange-row .head-banner{align-self:stretch;width:350px;box-sizing:border-box;padding:0 14px;border-radius:var(--radius-lg);font-size:12.5px;overflow:hidden}
+  .load-cancel{flex:none;margin-left:auto;border:none;border-left:1px solid var(--color-border-default);background:none;cursor:pointer;color:var(--color-text-subtle);font:600 12px var(--font-primary);padding:0 0 0 10px;height:18px;transition:color .15s}
+  .load-cancel:hover{color:var(--color-status-error)}
+  .load-cancel:disabled{opacity:.5;cursor:default}
+  .status-err.neutral{background:var(--color-surface-chip);border-color:var(--color-border-default)}
+  .daterange-row .head-banner .load-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .load-banner.ready{color:var(--color-status-success);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.08);}
   .load-banner .ic{width:14px;height:14px;flex:none;}
   .load-spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--color-border-strong);border-top-color:var(--color-accent);animation:cre-spin .8s linear infinite;flex:none;}
@@ -2709,7 +2713,7 @@ function renderDateRange(){
 
   return `<div class="daterange ${state.drOpen?'open':''}" id="dr">
     <div class="daterange-row">
-      ${isLoading() ? `<div class="load-banner head-banner"><span class="load-spin"></span><span class="load-text">Some sections are still loading&hellip;<span id="loadDetail" class="load-detail">${state.progressMsg?' · '+esc(state.progressMsg):''}</span></span></div>` : ''}
+      ${isLoading() ? `<div class="load-banner head-banner"><span class="load-spin"></span><span class="load-text">Some sections are still loading&hellip;<span id="loadDetail" class="load-detail">${state.progressMsg?' · '+esc(state.progressMsg):''}</span></span>${LIVE?`<button type="button" class="load-cancel" id="cancelReportBtn" title="Stop this report">Cancel</button>`:''}</div>` : ''}
       <div class="hdr-account">${xselect({id:'account', value:state.account, options:accountOptionsList(), searchLabel:'accounts'})}</div>
       <div class="daterange-trigger" data-trigger="dr">
         ${ic('calendar',14)}
@@ -2845,6 +2849,8 @@ function wireConfigBarOnly(){
       render();
     };
   }
+  const cancelBtn = document.getElementById('cancelReportBtn');
+  if(cancelBtn) cancelBtn.onclick = (e)=>{ e.stopPropagation(); cancelReport(cancelBtn); };
   const genBtn = document.getElementById('genReportBtn');
   if(genBtn) genBtn.onclick = (e)=>{
     e.stopPropagation();
@@ -2858,7 +2864,7 @@ function windowLabel(){
   const f = d=>new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
   return `your last 2 months (${f(state.winFrom)} to ${f(state.winTo)})`;
 }
-function isLoading(){ return LIVE ? (state.reportStatus!=='failed' && !(state.sigA&&state.sigB&&state.sigC&&state.sigD)) : !state.dataReady; }
+function isLoading(){ return LIVE ? (state.reportStatus!=='failed' && state.reportStatus!=='cancelled' && !(state.sigA&&state.sigB&&state.sigC&&state.sigD)) : !state.dataReady; }
 let ACCOUNTS = [];
 function accountOptionsList(){
   if(LIVE){
@@ -6242,6 +6248,10 @@ function renderStatusBar(){
     el.style.display = 'block';
     el.innerHTML = `<div class="status-err"><span>${esc(state.reportError||'The report could not be completed.')}${state.sigA?' What finished is shown below.':''}</span><button id="retryReport">Try again</button></div>`;
     document.getElementById('retryReport').onclick = ()=>createReport(true);
+  } else if(LIVE && state.reportStatus==='cancelled'){
+    el.style.display = 'block';
+    el.innerHTML = `<div class="status-err neutral"><span>Report stopped.${state.sigA?' What finished is shown below.':''}</span><button id="retryReport">Generate again</button></div>`;
+    document.getElementById('retryReport').onclick = ()=>createReport(true);
   } else if(flashMsg){
     el.style.display = 'block';
     el.innerHTML = `<div class="status-err"><span>${esc(flashMsg)}</span></div>`;
@@ -6269,6 +6279,17 @@ async function createReport(force){
     if(!r.ok) throw new Error(j.error||'Could not start the report');
     location.href = 'report.html?id='+j.id;
   }catch(e){ flashError(e.message); }
+}
+async function cancelReport(btn){
+  if(!confirm('Stop this report? Anything already pulled stays saved, so a new report on the same account will be faster.')) return;
+  btn.disabled = true; btn.textContent = 'Stopping…';
+  try{
+    const r = await fetch('/api/report/cancel',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({id:REPORT_ID})});
+    if(r.status===401){ location.href='/'; return; }
+    if(!r.ok) throw new Error('Could not stop the report');
+    state.reportStatus = 'cancelled'; state.progressMsg = '';
+    render();
+  }catch(e){ btn.disabled = false; btn.textContent = 'Cancel'; flashError(e.message); }
 }
 function createReportFromHeader(btn){ btn.disabled = true; btn.textContent = 'Starting…'; createReport(false).finally(()=>{ btn.disabled=false; btn.textContent='Generate Report'; }); }
 

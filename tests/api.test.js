@@ -117,3 +117,30 @@ test('running-report limit protects LLM spend', async () => {
   assert.equal((await mk('2026-02-01', '2026-02-28')).status, 200);
   assert.equal((await mk('2026-03-01', '2026-03-31')).status, 429);
 });
+
+test('cancel stops a running report, frees the running slot, and only the owner can do it', async () => {
+  const post = (url, body) => c(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  await q(`UPDATE reports SET status='done'`);
+  const { id } = await (await post('/api/report/create', { account_id: '1000000000001', date_from: '2025-05-01', date_to: '2025-05-31', force: true })).json();
+  await q(`UPDATE reports SET status='running' WHERE id=$1`, [id]);
+
+  // another user cannot cancel it
+  const { createSession } = await import('../lib/session.js');
+  const fakeRes = { headers: {}, getHeader() {}, setHeader(k, v) { this.headers[k] = v; } };
+  await createSession(fakeRes, 'other');
+  const ck = [].concat(fakeRes.headers['Set-Cookie'])[0].split(';')[0];
+  const r2 = await fetch(`${api.base}/api/report/cancel`, { method: 'POST', headers: { cookie: ck, 'content-type': 'application/json' }, body: JSON.stringify({ id }) });
+  assert.equal(r2.status, 404);
+  assert.equal((await (await c(`/api/report/status?id=${id}`)).json()).status, 'running');
+
+  const r = await (await post('/api/report/cancel', { id })).json();
+  assert.equal(r.status, 'cancelled');
+  const st = await (await c(`/api/report/status?id=${id}`)).json();
+  assert.equal(st.status, 'cancelled');
+  // a cancelled report is not reused for an identical request
+  const again = await (await post('/api/report/create', { account_id: '1000000000001', date_from: '2025-05-01', date_to: '2025-05-31' })).json();
+  assert.notEqual(again.id, id);
+  // cancelling a finished report is a harmless no-op
+  await q(`UPDATE reports SET status='done' WHERE id=$1`, [again.id]);
+  assert.equal((await (await post('/api/report/cancel', { id: again.id })).json()).status, 'done');
+});

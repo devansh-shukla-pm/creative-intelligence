@@ -72,3 +72,13 @@ The report page shows the range the user picked, but insights and the Lab always
 
 ## API keys
 `OPENROUTER_API_KEYS` (comma separated) plus `OPENROUTER_API_KEY`. `worker/llm.py` rotates keys per call, rests a key for 20 s on HTTP 429 and drops a key that returns 401, 402 or 403 while others remain.
+
+## Meta call budget
+Meta rate limits belong to the app (all users together) and to each ad account, so the worker treats Meta as a scarce shared resource:
+- `db.MetaGate`: a Postgres advisory lock held only while calls are made. One report talks to Meta at a time; others wait and show it on the page.
+- `meta_client._watch_usage`: reads `x-app-usage` and `x-business-use-case-usage`; sleeps at 75%, 30 s at 90%, or as long as Meta says when access returns.
+- Caches: `insights_cache` (account + range, 6 h), `ad_cache.creative` (7 days), thumbnails and video access outcome (no repeat failing calls).
+- Typical call count for a 1,800-ad, 3-month account: about 4 insight pages, 37 creative-detail batches the first time (none after), 1 previous-period call, about 4 video probes, plus the 60-day window (about 3 pages). Each run prints `[meta] requests made by this run: N`.
+
+## Cancelling
+`POST /api/report/cancel` sets the report to `cancelled`, then cancels the Actions run. `Report.progress()` raises `ReportCancelled` when the row is cancelled, so every long step stops at its next update; `finish()` and `fail()` never overwrite `cancelled`.

@@ -6,7 +6,7 @@ Safe to re-run: every step reads the caches first.
 from __future__ import annotations
 import argparse, dataclasses, datetime, sys, traceback, concurrent.futures as cf
 from . import config, db, cache
-from .report import Report, ReportError
+from .report import Report, ReportError, ReportCancelled
 from .llm import get_llm
 from .sources import get_source
 from . import extract, cluster, naming, assemble, insights
@@ -57,12 +57,10 @@ def _start_thumbs(rep, source, ads):
 
 def stage_a(rep, source):
     rep.progress("pulling", "Pulling your ads from Meta")
-    with cf.ThreadPoolExecutor(max_workers=1) as ex:
-        fprev = ex.submit(source.period_totals, rep, *previous_period(rep))        # the trend numbers load while the ads do
-        ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
-        if not ads:
-            raise ReportError("No ads with spend were found for this account and date range.")
-        prev = fprev.result()
+    ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
+    if not ads:
+        raise ReportError("No ads with spend were found for this account and date range.")
+    prev = source.period_totals(rep, *previous_period(rep))        # one account-level call
     conn = rep.conn
     _save_creatives(rep, ads)
     cache.save_report_ads(conn, rep.id, ads)
@@ -151,8 +149,8 @@ def stage_d(rep, data):
 def run(report_id):
     conn = db.connect(); db.migrate(conn)
     rep = Report.load(conn, report_id)
-    rep.start()
     try:
+        rep.start()
         llm = get_llm(); source = get_source(rep)
         ads, prev = stage_a(rep, source)
         data = stage_b(rep, source, llm, ads, prev)
@@ -162,6 +160,8 @@ def run(report_id):
         from . import meta_client
         print(f"[meta] requests made by this run: {meta_client.CALLS[0]}", flush=True)
         rep.finish()
+    except ReportCancelled:
+        print("Cancelled by the user.", flush=True); return 0
     except ReportError as e:
         rep.fail(str(e)); print("FAILED:", e, file=sys.stderr); return 1
     except Exception as e:

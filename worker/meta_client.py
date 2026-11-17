@@ -16,9 +16,15 @@ ATC = ["omni_add_to_cart", "offsite_conversion.fb_pixel_add_to_cart", "add_to_ca
 LPV = ["landing_page_view"]
 INSIGHT_FIELDS = ("ad_id,ad_name,campaign_id,campaign_name,adset_id,adset_name,spend,impressions,frequency,"
                   "clicks,inline_link_clicks,actions,action_values")
+# Only the sub-fields the app reads. Asking for the whole object_story_spec / asset_feed_spec makes every call heavier on Meta's
+# side (their budget counts CPU time), and creative details are the biggest call in a pull. If Meta rejects the nested syntax
+# (error 100) the plain full-object fields below are used instead.
+_SPEC = ("object_story_spec{video_data{video_id,message,title,link_description,call_to_action,image_url},"
+         "link_data{message,name,description,picture,call_to_action,child_attachments{picture,image_url}},photo_data{url}},"
+         "asset_feed_spec{images,videos,bodies,titles,descriptions,call_to_action_types}")
 CREATIVE_FIELDS = ("id,name,effective_status,preview_shareable_link,"
-                   "creative.thumbnail_width(480).thumbnail_height(480){id,thumbnail_url,image_url,video_id,"
-                   "body,title,call_to_action_type,object_story_spec,asset_feed_spec}")
+                   "creative.thumbnail_width(480).thumbnail_height(480){id,thumbnail_url,image_url,video_id,body,title,call_to_action_type,"
+                   + _SPEC + "}")
 CREATIVE_FIELDS_PLAIN = ("id,name,effective_status,preview_shareable_link,"
                          "creative{id,thumbnail_url,image_url,video_id,body,title,call_to_action_type,object_story_spec,asset_feed_spec}")
 

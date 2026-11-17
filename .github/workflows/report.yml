@@ -1,4 +1,5 @@
 name: report-worker
+run-name: report ${{ inputs.report_id || github.event.client_payload.report_id }}
 
 # Started by the API (workflow_dispatch) when a user generates a report. Runs the whole pipeline for one report.
 on:

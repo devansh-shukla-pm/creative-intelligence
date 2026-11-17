@@ -48,7 +48,7 @@
   .rep{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:8px;color:inherit;text-decoration:none}
   .rep:hover{border-color:var(--border-strong)} .rep b{font-size:13px;display:block} .rep span{font-size:12px;color:var(--muted)}
   .chip{font-size:10.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;border-radius:999px;padding:4px 10px;background:var(--chip);color:var(--muted);white-space:nowrap}
-  .chip.done{color:var(--ok)} .chip.running,.chip.queued{color:var(--warn)} .chip.failed{color:var(--bad)}
+  .chip.done{color:var(--ok)} .chip.running,.chip.queued{color:var(--warn)} .chip.failed{color:var(--bad)} .chip.cancelled{color:var(--muted)}
   .hide{display:none}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -142,7 +142,7 @@
       const reports = (await l.json()).reports;
       if(reports.length){
         $('recent').classList.remove('hide');
-        $('recentList').innerHTML = reports.map(x=>`<a class="rep" href="report.html?id=${esc(x.id)}"><div><b>${esc(x.account_name||x.account_id)}</b><span>${esc(x.date_from)} to ${esc(x.date_to)}</span></div><span class="chip ${esc(x.status)}">${esc(x.status)}</span></a>`).join('');
+        $('recentList').innerHTML = reports.map(x=>`<a class="rep" href="report.html?id=${esc(x.id)}"><div><b>${esc(x.account_name||x.account_id)}</b><span>${esc(x.date_from)} to ${esc(x.date_to)}</span></div><span class="chip ${esc(x.status)}">${esc(x.status==='cancelled'?'stopped':x.status)}</span></a>`).join('');
       }
     }
   }

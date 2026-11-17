@@ -1,12 +1,13 @@
 """Where ads come from. The pipeline only talks to this interface, so real Meta and the mock are interchangeable."""
 from __future__ import annotations
-from . import cache, config, crypto, meta_client as mc
+from . import cache, config, crypto, db, meta_client as mc
 from .report import ReportError
 
 class MetaSource:
-    def __init__(self, token, account_id=None):
+    def __init__(self, token, account_id=None, rep=None):
         self.token = token
         self.account_id = account_id
+        self.rep = rep
         self._acct_videos = None            # video_id -> info from the ad account's own video library, fetched at most once
 
     @classmethod
@@ -14,23 +15,29 @@ class MetaSource:
         blob = rep.user_token_blob()
         if not blob:
             raise ReportError("Meta login not found. Connect Meta again.")
-        return cls(crypto.decrypt(blob), rep.account_id)
+        return cls(crypto.decrypt(blob), rep.account_id, rep)
 
     def fetch_ads(self, rep, on_progress=None):
         """-> [{ad_id, ad_name, campaign_id, campaign_name, metrics, creative}]"""
         try:
             rows = cache.get_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to)
-            if rows is None:
-                rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
-                                        on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
-                cache.put_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to, rows)
-            elif on_progress:
+            if rows is not None and on_progress:
                 on_progress(f"Loaded {len(rows)} ads (pulled earlier today)")
-            ids = [r["ad_id"] for r in rows]
-            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else {}      # read in the last week: do not ask Meta again
-            need = [i for i in ids if i not in fresh]
-            details = mc.pull_ad_details(self.token, need,
-                                         on_progress=(lambda n: on_progress(f"Reading creative details: {n} of {len(need)}")) if on_progress else None) if need else {}
+            ids = [r["ad_id"] for r in rows] if rows is not None else None
+            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else None   # read in the last week
+            if rows is None or any(i not in fresh for i in ids):          # something is missing: Meta is needed
+                with db.MetaGate(rep):
+                    if rows is None:
+                        rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
+                                                on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
+                        cache.put_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to, rows)
+                        ids = [r["ad_id"] for r in rows]
+                        fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else {}
+                    need = [i for i in ids if i not in fresh]
+                    details = mc.pull_ad_details(self.token, need,
+                                                 on_progress=(lambda n: on_progress(f"Reading creative details: {n} of {len(need)}")) if on_progress else None) if need else {}
+            else:
+                details = {}
         except mc.TokenExpired:
             raise ReportError("Your Meta login expired. Connect Meta again and generate the report.")
         except mc.MetaError as e:
@@ -47,7 +54,8 @@ class MetaSource:
 
     def period_totals(self, rep, since, until):
         try:
-            return mc.pull_period_totals(self.token, rep.account_id, since, until)
+            with db.MetaGate(rep):
+                return mc.pull_period_totals(self.token, rep.account_id, since, until)
         except mc.MetaError:
             return None                      # the trend is optional: never fail the report over it
 
@@ -59,11 +67,13 @@ class MetaSource:
     def video_urls(self, ads):
         """ad_id -> fresh video url, only for the ads that need extraction."""
         by_video = {a["creative"]["video_id"]: a["ad_id"] for a in ads if a["creative"].get("video_id")}
-        src = mc.pull_video_sources(self.token, by_video.keys())
+        with db.MetaGate(self.rep):
+            src = mc.pull_video_sources(self.token, by_video.keys())
         urls = {by_video[v]: (info or {}).get("source") for v, info in src.items() if (info or {}).get("source")}
         missing = [v for v in by_video if by_video[v] not in urls]
         if missing:                          # Page-level access refused: try the ad account's own video library
-            acct = self._account_videos(missing)
+            with db.MetaGate(self.rep):
+                acct = self._account_videos(missing)
             for v in missing:
                 if (acct.get(v) or {}).get("source"): urls[by_video[v]] = acct[v]["source"]
         return urls
@@ -71,10 +81,12 @@ class MetaSource:
     def video_frames(self, ads):
         """ad_id -> still frames, used when the video file itself is not available."""
         by_video = {a["creative"]["video_id"]: a["ad_id"] for a in ads if a["creative"].get("video_id")}
-        out = {by_video[v]: u for v, u in mc.pull_video_frames(self.token, by_video.keys()).items()}
+        with db.MetaGate(self.rep):
+            out = {by_video[v]: u for v, u in mc.pull_video_frames(self.token, by_video.keys()).items()}
         missing = [v for v in by_video if by_video[v] not in out]
         if missing:
-            acct = self._account_videos(missing)
+            with db.MetaGate(self.rep):
+                acct = self._account_videos(missing)
             for v in missing:
                 uris = [t.get("uri") for t in ((acct.get(v) or {}).get("thumbnails") or {}).get("data", []) if t.get("uri")]
                 if uris:

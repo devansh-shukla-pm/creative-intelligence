@@ -82,21 +82,25 @@ def run_extraction(conn, rep, llm, source, ads, cached, progress):
     workers = config.EXTRACT_CONCURRENCY or 12 * getattr(llm, "n_keys", 1)
     with cf.ThreadPoolExecutor(max_workers=workers) as pool:
         futs = {pool.submit(work, a): a for a in todo}
-        for fut in cf.as_completed(futs):
-            ad = futs[fut]
-            prev = cached.get(ad["ad_id"]) or {}
-            attempts = (prev.get("extraction_attempts") or 0) + 1
-            try:
-                result, fb = fut.result()
-                if not isinstance(result, dict):
-                    raise LLMError("extraction did not return an object")
-                cache.save_extraction(conn, rep.account_id, ad["ad_id"], result, "fallback" if fb else "ok", attempts)
-                ok += 1
-            except Exception as e:                       # one bad ad must never block the report
-                no_media = "No creative" in str(e)
-                final = no_media or attempts >= config.EXTRACT_ATTEMPTS
-                cache.bump_attempt(conn, rep.account_id, ad["ad_id"], attempts, ("skipped" if no_media else "failed") if final else None)
-                failed += 1
-            done += 1
-            progress(f"Reading ads: {done} of {total_ads}", done, total_ads)
+        try:
+            for fut in cf.as_completed(futs):
+                ad = futs[fut]
+                prev = cached.get(ad["ad_id"]) or {}
+                attempts = (prev.get("extraction_attempts") or 0) + 1
+                try:
+                    result, fb = fut.result()
+                    if not isinstance(result, dict):
+                        raise LLMError("extraction did not return an object")
+                    cache.save_extraction(conn, rep.account_id, ad["ad_id"], result, "fallback" if fb else "ok", attempts)
+                    ok += 1
+                except Exception as e:                       # one bad ad must never block the report
+                    no_media = "No creative" in str(e)
+                    final = no_media or attempts >= config.EXTRACT_ATTEMPTS
+                    cache.bump_attempt(conn, rep.account_id, ad["ad_id"], attempts, ("skipped" if no_media else "failed") if final else None)
+                    failed += 1
+                done += 1
+                progress(f"Reading ads: {done} of {total_ads}", done, total_ads)
+        except BaseException:
+            for f in futs: f.cancel()        # Cancel pressed or a hard failure: do not start the reads still queued
+            raise
     return {"new": len(todo), "ok": ok, "failed": failed}

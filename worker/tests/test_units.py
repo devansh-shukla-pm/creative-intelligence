@@ -184,3 +184,31 @@ def test_usage_header_throttle(monkeypatch):
     mc._watch_usage({"x-app-usage": '{"call_count": 40}'}); assert slept == []
     mc._watch_usage({"x-app-usage": '{"call_count": 80}'}); assert slept == [5]
     mc._watch_usage({"x-business-use-case-usage": '{"1":[{"call_count": 50, "estimated_time_to_regain_access": 2}]}'}); assert slept[-1] == 120
+
+
+def test_meta_gate_lets_one_report_through(conn, env):
+    from worker import db
+    class Rep:
+        def __init__(self): self.msgs = []
+        def progress(self, stage, message, *a, **k): self.msgs.append(message)
+    first = db.MetaGate(Rep()); first.__enter__()
+    second_rep = Rep(); second = db.MetaGate(second_rep, poll_s=0.05)
+    import threading
+    got = []
+    t = threading.Thread(target=lambda: (second.__enter__(), got.append(1), second.__exit__()))
+    t.start(); import time; time.sleep(0.4)
+    assert got == [] and any("Waiting for another report" in m for m in second_rep.msgs)     # waits, and says so
+    first.__exit__()
+    t.join(timeout=5); assert got == [1]
+
+
+def test_cancelled_report_stops_at_next_progress(conn):
+    import pytest
+    from worker.tests.conftest import make_report
+    from worker.report import Report, ReportCancelled
+    rid = make_report(conn)
+    rep = Report.load(conn, rid); rep.start(); rep.progress("pulling", "x")
+    conn.execute("UPDATE reports SET status='cancelled' WHERE id=%s", (rid,))
+    with pytest.raises(ReportCancelled): rep.progress("pulling", "y")
+    rep.finish(); rep.fail("boom")                                  # neither may overwrite 'cancelled'
+    assert conn.execute("SELECT status FROM reports WHERE id=%s", (rid,)).fetchone()["status"] == "cancelled"
