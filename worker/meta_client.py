@@ -153,6 +153,8 @@ def explain_empty(d, since, until):
         return "Meta reports spend for this range at account level but returned no ad-level rows. This is usually temporary, so try again in a few minutes."
     if d.get("has_ads") is False:
         return "This ad account has no ads yet."
+    if d.get("lifetime_spent") == 0 and d.get("has_ads"):
+        return "This ad account has ads but has never spent anything, so there is nothing to analyze yet. Pick an account that has run ads."
     hint = " It has spent before, so try an earlier range." if (d.get("lifetime_spent") or 0) > 0 else ""
     return f"Meta shows no spend on this account between {rng}.{hint}"
 

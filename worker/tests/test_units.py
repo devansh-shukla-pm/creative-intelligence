@@ -237,4 +237,5 @@ def test_explain_empty_cases():
     assert "not active" in explain_empty({"account_status": 2}, f, t)
     assert "account level" in explain_empty({"account_status": 1, "range_spend": 120.0}, f, t)
     assert "no ads yet" in explain_empty({"account_status": 1, "range_spend": 0, "has_ads": False}, f, t)
+    assert "never spent" in explain_empty({"account_status": 1, "range_spend": 0, "lifetime_spent": 0.0, "has_ads": True}, f, t)
     assert "temporary" not in explain_empty({"account_status": 1, "range_spend": 0, "has_ads": True}, f, t)
