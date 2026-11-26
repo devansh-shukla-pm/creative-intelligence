@@ -144,3 +144,29 @@ test('cancel stops a running report, frees the running slot, and only the owner 
   await q(`UPDATE reports SET status='done' WHERE id=$1`, [again.id]);
   assert.equal((await (await post('/api/report/cancel', { id: again.id })).json()).status, 'done');
 });
+
+test('a finished report is copied for another user instantly, with no worker', async () => {
+  const post = (url, body, cookie) => fetch(`${api.base}${url}`, { method: 'POST', headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: JSON.stringify(body) });
+  await q(`UPDATE reports SET status='done'`);
+  const { id } = await (await c('/api/report/create', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ account_id: '1000000000001', date_from: '2025-03-01', date_to: '2025-03-31', force: true }) })).json();
+  await q(`UPDATE reports SET status='done', signal_a=now(), signal_b=now(), signal_c=now(), signal_d=now(), window_from='2025-02-01', window_to='2025-03-31' WHERE id=$1`, [id]);
+  await q(`INSERT INTO report_payloads (report_id, kind, body) VALUES ($1,'data','{"ads":[1,2,3]}'),($1,'insights','[{"headline":"h"}]')`, [id]);
+  const { createSession } = await import('../lib/session.js');
+  const fakeRes = { headers: {}, getHeader() {}, setHeader(k, v) { this.headers[k] = v; } };
+  await createSession(fakeRes, 'other');
+  const ck = [].concat(fakeRes.headers['Set-Cookie'])[0].split(';')[0];
+
+  // same account and range: copied, done, payloads present, no worker needed
+  const copy = await (await post('/api/report/create', { account_id: '1000000000001', date_from: '2025-03-01', date_to: '2025-03-31' }, ck)).json();
+  assert.equal(copy.copied, true); assert.notEqual(copy.id, id);
+  const st = await (await fetch(`${api.base}/api/report/status?id=${copy.id}`, { headers: { cookie: ck } })).json();
+  assert.equal(st.status, 'done'); assert.deepEqual(st.signals, { a: true, b: true, c: true, d: true });
+  assert.equal(st.window_from, '2025-02-01');
+  const kinds = (await q(`SELECT kind FROM report_payloads WHERE report_id=$1 ORDER BY kind`, [copy.id])).map(r => r.kind);
+  assert.deepEqual(kinds, ['data', 'insights']);
+  // the copy belongs to the second user only
+  assert.equal((await c(`/api/report/status?id=${copy.id}`)).status, 404);
+  // a different range is not copied
+  const other = await (await post('/api/report/create', { account_id: '1000000000001', date_from: '2025-03-01', date_to: '2025-03-30' }, ck)).json();
+  assert.notEqual(other.copied, true);
+});

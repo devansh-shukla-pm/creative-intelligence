@@ -82,3 +82,6 @@ Meta rate limits belong to the app (all users together) and to each ad account, 
 
 ## Cancelling
 `POST /api/report/cancel` sets the report to `cancelled`, then cancels the Actions run. `Report.progress()` raises `ReportCancelled` when the row is cancelled, so every long step stops at its next update; `finish()` and `fail()` never overwrite `cancelled`.
+
+## Reuse across users
+`createReport` order: (1) same user, same account and range within 6 h: open that report; (2) any other user's finished report for the same account and exact range within 6 h: `copyReport` clones it (no worker); (3) otherwise create a report and dispatch the worker. The worker then reuses ad-level caches (`ad_cache`, `thumbs`, `account_memory`, `insights_cache`) that are keyed by ad account, so even a new range for a known account only pays for new ads.
