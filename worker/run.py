@@ -163,7 +163,8 @@ def run(report_id):
     except ReportCancelled:
         print("Cancelled by the user.", flush=True); return 0
     except ReportError as e:
-        rep.fail(str(e)); print("FAILED:", e, file=sys.stderr); return 1
+        rep.fail(str(e)); print("FAILED:", e, file=sys.stderr)
+        return 0                          # the failure is shown on the report page; the job itself did its work, so no GitHub alert
     except Exception as e:
         traceback.print_exc()
         rep.fail("Something went wrong while building the report. Try again.")

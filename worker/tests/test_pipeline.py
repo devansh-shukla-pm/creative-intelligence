@@ -46,6 +46,6 @@ def test_failure_is_reported_not_raised(conn, env, monkeypatch):
     from worker import run as runner, mock
     monkeypatch.setattr(mock.MockSource, "fetch_ads", lambda self, rep, on_progress=None: [])
     rid = make_report(conn, account="1000000000002")
-    assert runner.run(rid) == 1
+    assert runner.run(rid) == 0          # a reported failure is not a failed job (no GitHub alert)
     r = conn.execute("SELECT status, error FROM reports WHERE id=%s", (rid,)).fetchone()
     assert r["status"] == "failed" and "No ads" in r["error"]

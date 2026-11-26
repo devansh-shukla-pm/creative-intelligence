@@ -20,7 +20,7 @@ class MetaSource:
     def fetch_ads(self, rep, on_progress=None):
         """-> [{ad_id, ad_name, campaign_id, campaign_name, metrics, creative}]"""
         try:
-            rows = cache.get_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to)
+            rows = cache.get_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to) or None
             if rows is not None and on_progress:
                 on_progress(f"Loaded {len(rows)} ads (pulled earlier today)")
             ids = [r["ad_id"] for r in rows] if rows is not None else None
@@ -30,6 +30,10 @@ class MetaSource:
                     if rows is None:
                         rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
                                                 on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
+                        if not rows:                              # never cache an empty answer: say why, and let a retry ask Meta again
+                            d = mc.diagnose_empty(self.token, rep.account_id, rep.date_from, rep.date_to)
+                            print(f"[meta] no ads with spend returned: {d}", flush=True)
+                            raise ReportError(mc.explain_empty(d, rep.date_from, rep.date_to))
                         cache.put_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to, rows)
                         ids = [r["ad_id"] for r in rows]
                         fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else {}

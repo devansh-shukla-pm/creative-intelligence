@@ -111,6 +111,51 @@ def _f(x, d=0.0):
     try: return float(x)
     except (TypeError, ValueError): return d
 
+def diagnose_empty(token, account_id, since, until):
+    """Meta returned no ad rows with spend. Find out why, so the report can say so instead of a bare 'no ads'.
+    Three cheap calls: the account itself, its account-level spend for the range, and whether it has any ads at all."""
+    d = {}
+    try:
+        a = _get(f"{GRAPH}/act_{account_id}", {"fields": "account_status,amount_spent,disable_reason"}, token, tries=2)
+        d["account_status"] = a.get("account_status"); d["lifetime_spent"] = _f(a.get("amount_spent")); d["disable_reason"] = a.get("disable_reason")
+    except TokenExpired:
+        raise
+    except MetaError as e:
+        d["account_error"] = str(e)[:160]
+    try:
+        r = _get(f"{GRAPH}/act_{account_id}/insights", {"level": "account", "fields": "spend",
+                 "time_range": json.dumps({"since": since, "until": until})}, token, tries=2)
+        rows = r.get("data") or []
+        d["range_spend"] = _f(rows[0].get("spend")) if rows else 0.0
+    except TokenExpired:
+        raise
+    except MetaError as e:
+        d["insights_error"] = str(e)[:160]
+    try:
+        r = _get(f"{GRAPH}/act_{account_id}/ads", {"fields": "id", "limit": 1}, token, tries=2)
+        d["has_ads"] = bool(r.get("data"))
+    except TokenExpired:
+        raise
+    except MetaError:
+        d["has_ads"] = None
+    return d
+
+def explain_empty(d, since, until):
+    """One plain-English sentence for the report page."""
+    rng = f"{since} to {until}"
+    if d.get("account_error"):
+        return "Meta does not let your login read this ad account. Ask for access to it in Business Manager, then connect Meta again."
+    if d.get("insights_error"):
+        return f"Meta refused to share this account's results for {rng} ({d['insights_error'][:90]}). Try again in a few minutes."
+    if d.get("account_status") not in (None, 1):
+        return "This ad account is not active in Meta (disabled, in review or closed), so it returns no results."
+    if (d.get("range_spend") or 0) > 0:
+        return "Meta reports spend for this range at account level but returned no ad-level rows. This is usually temporary, so try again in a few minutes."
+    if d.get("has_ads") is False:
+        return "This ad account has no ads yet."
+    hint = " It has spent before, so try an earlier range." if (d.get("lifetime_spent") or 0) > 0 else ""
+    return f"Meta shows no spend on this account between {rng}.{hint}"
+
 def metrics_from_insight(row: dict) -> dict:
     spend = _f(row.get("spend"))
     clicks = _f(row.get("clicks")); link_clicks = _f(row.get("inline_link_clicks")); impr = _f(row.get("impressions"))
