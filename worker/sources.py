@@ -1,6 +1,6 @@
 """Where ads come from. The pipeline only talks to this interface, so real Meta and the mock are interchangeable."""
 from __future__ import annotations
-from . import cache, config, crypto, db, meta_client as mc
+from . import cache, config, crypto, daily, db, meta_client as mc
 from .report import ReportError
 
 class MetaSource:
@@ -18,30 +18,30 @@ class MetaSource:
         return cls(crypto.decrypt(blob), rep.account_id, rep)
 
     def fetch_ads(self, rep, on_progress=None):
-        """-> [{ad_id, ad_name, campaign_id, campaign_name, metrics, creative}]"""
+        """-> [{ad_id, ad_name, campaign_id, campaign_name, metrics, creative}]
+        Numbers come from the per-day store: only days not stored yet (or still provisional) are asked from Meta."""
         try:
-            rows = cache.get_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to) or None
-            if rows is not None and on_progress:
-                on_progress(f"Loaded {len(rows)} ads (pulled earlier today)")
-            ids = [r["ad_id"] for r in rows] if rows is not None else None
-            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else None   # read in the last week
-            if rows is None or any(i not in fresh for i in ids):          # something is missing: Meta is needed
+            conn = rep.conn
+            missing = daily.missing_days(conn, rep.account_id, rep.date_from, rep.date_to)
+            if missing:
                 with db.MetaGate(rep):
-                    if rows is None:
-                        rows = mc.pull_insights(self.token, rep.account_id, rep.date_from, rep.date_to,
-                                                on_page=(lambda n: on_progress(f"Pulled {n} ads from Meta")) if on_progress else None)
-                        if not rows:                              # never cache an empty answer: say why, and let a retry ask Meta again
-                            d = mc.diagnose_empty(self.token, rep.account_id, rep.date_from, rep.date_to)
-                            print(f"[meta] no ads with spend returned: {d}", flush=True)
-                            raise ReportError(mc.explain_empty(d, rep.date_from, rep.date_to))
-                        cache.put_insights(rep.conn, rep.account_id, rep.date_from, rep.date_to, rows)
-                        ids = [r["ad_id"] for r in rows]
-                        fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168) if ids else {}
-                    need = [i for i in ids if i not in fresh]
+                    daily.pull_missing(conn, self.token, rep.account_id, missing, on_progress)
+            elif on_progress:
+                on_progress("Loaded your ad numbers (already pulled)")
+            rows = daily.aggregate(conn, rep.account_id, rep.date_from, rep.date_to)
+            if not rows:
+                with db.MetaGate(rep):
+                    d = mc.diagnose_empty(self.token, rep.account_id, rep.date_from, rep.date_to)
+                print(f"[meta] no ads with spend returned: {d}", flush=True)
+                raise ReportError(mc.explain_empty(d, rep.date_from, rep.date_to))
+            ids = [r["ad_id"] for r in rows]
+            fresh = cache.fresh_creatives(conn, rep.account_id, ids, hours=168)      # read in the last week
+            need = [i for i in ids if i not in fresh]
+            details = {}
+            if need:
+                with db.MetaGate(rep):
                     details = mc.pull_ad_details(self.token, need,
-                                                 on_progress=(lambda n: on_progress(f"Reading creative details: {n} of {len(need)}")) if on_progress else None) if need else {}
-            else:
-                details = {}
+                                                 on_progress=(lambda n: on_progress(f"Reading creative details: {n} of {len(need)}")) if on_progress else None)
         except mc.TokenExpired:
             raise ReportError("Your Meta login expired. Connect Meta again and generate the report.")
         except mc.MetaError as e:
@@ -57,6 +57,8 @@ class MetaSource:
         return ads
 
     def period_totals(self, rep, since, until):
+        stored = daily.totals(rep.conn, rep.account_id, since, until)       # the whole period is already stored: no Meta call
+        if stored: return stored
         try:
             with db.MetaGate(rep):
                 return mc.pull_period_totals(self.token, rep.account_id, since, until)

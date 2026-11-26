@@ -110,3 +110,40 @@ CREATE TABLE IF NOT EXISTS insights_cache (
 
 -- How many times an ad has been sent to the clustering prompt, so an ad the model keeps skipping a field for is not re-sent forever.
 ALTER TABLE ad_cache ADD COLUMN IF NOT EXISTS cluster_attempts int NOT NULL DEFAULT 0;
+
+-- Meta results stored per ad per day, so any date range is a sum of stored days and only days we do not have are pulled.
+CREATE TABLE IF NOT EXISTS ad_daily (
+  account_id  text NOT NULL,
+  ad_id       text NOT NULL,
+  day         date NOT NULL,
+  spend       double precision NOT NULL,
+  impressions double precision NOT NULL DEFAULT 0,
+  clicks      double precision NOT NULL DEFAULT 0,
+  link_clicks double precision NOT NULL DEFAULT 0,
+  purchases   double precision NOT NULL DEFAULT 0,
+  value       double precision NOT NULL DEFAULT 0,
+  atc         double precision NOT NULL DEFAULT 0,
+  lpv         double precision NOT NULL DEFAULT 0,
+  frequency   double precision NOT NULL DEFAULT 0,
+  PRIMARY KEY (account_id, ad_id, day)
+);
+CREATE INDEX IF NOT EXISTS ad_daily_day_idx ON ad_daily (account_id, day);
+
+-- Names that go with an ad id (the daily rows stay small).
+CREATE TABLE IF NOT EXISTS ad_names (
+  account_id    text NOT NULL,
+  ad_id         text NOT NULL,
+  ad_name       text,
+  campaign_id   text,
+  campaign_name text,
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, ad_id)
+);
+
+-- Days already pulled for an account (a day with no spend is pulled too). pulled_at says whether the day was final when pulled.
+CREATE TABLE IF NOT EXISTS insight_days (
+  account_id text NOT NULL,
+  day        date NOT NULL,
+  pulled_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, day)
+);

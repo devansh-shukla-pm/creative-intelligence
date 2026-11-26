@@ -214,20 +214,20 @@ def test_cancelled_report_stops_at_next_progress(conn):
     assert conn.execute("SELECT status FROM reports WHERE id=%s", (rid,)).fetchone()["status"] == "cancelled"
 
 
-def test_empty_meta_answer_is_explained_and_not_cached(conn, env, monkeypatch):
+def test_empty_meta_answer_is_explained(conn, env, monkeypatch):
     import pytest
-    from worker import meta_client as mc, cache
+    from worker import meta_client as mc
     from worker.sources import MetaSource
     from worker.report import Report, ReportError
     from worker.tests.conftest import make_report
-    monkeypatch.setattr(mc, "pull_insights", lambda *a, **k: [])
+    monkeypatch.setattr(mc, "pull_insights_daily", lambda *a, **k: [])
+    monkeypatch.setattr(mc, "account_spend", lambda *a, **k: 0.0)
     monkeypatch.setattr(mc, "diagnose_empty", lambda *a, **k: {"account_status": 1, "range_spend": 0.0, "lifetime_spent": 5000.0, "has_ads": True})
-    rid = make_report(conn, account="1000000000009", dates=("2026-08-29", "2026-11-26"))
+    rid = make_report(conn, account="1000000000009", dates=("2026-01-01", "2026-01-10"))
     rep = Report.load(conn, rid)
     with pytest.raises(ReportError) as e:
         MetaSource("tok", rep.account_id, rep).fetch_ads(rep)
     assert "no spend" in str(e.value) and "earlier range" in str(e.value)
-    assert cache.get_insights(conn, rep.account_id, "2026-08-29", "2026-11-26") is None       # a retry asks Meta again
 
 
 def test_explain_empty_cases():
