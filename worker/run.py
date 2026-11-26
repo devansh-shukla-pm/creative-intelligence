@@ -55,19 +55,45 @@ def _start_thumbs(rep, source, ads):
     ex = cf.ThreadPoolExecutor(max_workers=1)
     _BG.append(ex.submit(_thumbs_job, rep.account_id, source, ads))
 
-def stage_a(rep, source):
-    rep.progress("pulling", "Pulling your ads from Meta")
-    ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
-    if not ads:
-        raise ReportError("No ads with spend were found for this account and date range.")
-    prev = source.period_totals(rep, *previous_period(rep))        # one account-level call
+def _write_metric_payloads(rep, ads, prev):
     conn = rep.conn
-    _save_creatives(rep, ads)
-    cache.save_report_ads(conn, rep.id, ads)
     db.upsert_payload(conn, rep.id, "audit", assemble.audit_rows(ads))
     db.upsert_payload(conn, rep.id, "cmt_ads", assemble.cmt_ads(ads))
     db.upsert_payload(conn, rep.id, "data", assemble.build_data(ads, {}, prev))   # metrics only until classification is done
-    rep.signal("a")
+
+def stage_a(rep, source):
+    """Numbers first: the page opens the moment spend, ROAS and the rest are in. Creative details (format, status, preview links) and
+    thumbnails follow in the background and refresh the page when they land."""
+    rep.progress("pulling", "Pulling your ads from Meta")
+    conn = rep.conn
+    if hasattr(source, "fetch_metrics"):
+        rows = source.fetch_metrics(rep, on_progress=lambda m: rep.progress("pulling", m))
+        ads = source.provisional_ads(rep, rows)
+        if not ads:
+            raise ReportError("No ads with spend were found for this account and date range.")
+        prev = source.period_totals(rep, *previous_period(rep))        # stored blocks when the period is stored, else one account-level call
+        cache.save_report_ads(conn, rep.id, ads)
+        _write_metric_payloads(rep, ads, prev)
+        rep.signal("a")                                                # <- the page opens here, long before creative details are in
+        full, fetched = source.attach_creatives(rep, rows, on_progress=lambda m: rep.progress("pulling", m))
+        if fetched:                                                    # details arrived for new ads: refresh what the page already shows
+            ads = full
+            cache.save_report_ads(conn, rep.id, ads)
+            _save_creatives(rep, ads)
+            _write_metric_payloads(rep, ads, prev)
+            rep.bump_rev()
+        else:
+            ads = full
+            _save_creatives(rep, ads)
+    else:                                                              # offline mock source: everything at once
+        ads = source.fetch_ads(rep, on_progress=lambda m: rep.progress("pulling", m))
+        if not ads:
+            raise ReportError("No ads with spend were found for this account and date range.")
+        prev = source.period_totals(rep, *previous_period(rep))
+        _save_creatives(rep, ads)
+        cache.save_report_ads(conn, rep.id, ads)
+        _write_metric_payloads(rep, ads, prev)
+        rep.signal("a")
     _start_thumbs(rep, source, ads)
     return ads, prev
 

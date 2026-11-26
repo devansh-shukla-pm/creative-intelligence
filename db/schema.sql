@@ -150,3 +150,6 @@ CREATE TABLE IF NOT EXISTS ad_names (
   updated_at    timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (account_id, ad_id)
 );
+
+-- Bumped when payloads the page already has are refreshed (creative details arriving after the numbers), so the page re-fetches them.
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS rev int NOT NULL DEFAULT 0;

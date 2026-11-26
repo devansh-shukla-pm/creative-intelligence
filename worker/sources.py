@@ -17,9 +17,8 @@ class MetaSource:
             raise ReportError("Meta login not found. Connect Meta again.")
         return cls(crypto.decrypt(blob), rep.account_id, rep)
 
-    def fetch_ads(self, rep, on_progress=None):
-        """-> [{ad_id, ad_name, campaign_id, campaign_name, metrics, creative}]
-        Numbers come from the per-day store: only days not stored yet (or still provisional) are asked from Meta."""
+    def fetch_metrics(self, rep, on_progress=None):
+        """Phase 1: the numbers (spend, ROAS, ...) as insight-shaped rows. Only the date gaps not stored yet are asked from Meta."""
         try:
             conn = rep.conn
             if blocks.needs_pull(conn, rep.account_id, rep.date_from, rep.date_to):
@@ -34,8 +33,30 @@ class MetaSource:
                     d = mc.diagnose_empty(self.token, rep.account_id, rep.date_from, rep.date_to)
                 print(f"[meta] no ads with spend returned: {d}", flush=True)
                 raise ReportError(mc.explain_empty(d, rep.date_from, rep.date_to))
+            return rows
+        except mc.TokenExpired:
+            raise ReportError("Your Meta login expired. Connect Meta again and generate the report.")
+        except mc.MetaError as e:
+            raise ReportError(f"Meta API error: {e}")
+
+    def provisional_ads(self, rep, rows):
+        """Ads with their numbers and whatever creative info is already cached, so the page can show metrics before creative details load.
+        Ads we know nothing about yet are marked PENDING."""
+        known = cache.load_cache(rep.conn, rep.account_id, [r["ad_id"] for r in rows])
+        ads = []
+        for r in rows:
+            cr = (known.get(r["ad_id"]) or {}).get("creative") or {}
+            ads.append({"ad_id": r["ad_id"], "ad_name": r.get("ad_name") or cr.get("ad_name") or "",
+                        "campaign_id": r.get("campaign_id"), "campaign_name": r.get("campaign_name"),
+                        "metrics": mc.metrics_from_insight(r), "creative": cr if cr.get("media_type") else {"media_type": "PENDING"}})
+        return ads
+
+    def attach_creatives(self, rep, rows, on_progress=None):
+        """Phase 2: creative details (format, status, preview link, ad copy). Only for ads not read in the last week.
+        -> (ads, number of ads whose details were just fetched)"""
+        try:
             ids = [r["ad_id"] for r in rows]
-            fresh = cache.fresh_creatives(conn, rep.account_id, ids, hours=168)      # read in the last week
+            fresh = cache.fresh_creatives(rep.conn, rep.account_id, ids, hours=168)
             need = [i for i in ids if i not in fresh]
             details = {}
             if need:
@@ -54,7 +75,11 @@ class MetaSource:
                 "campaign_id": r.get("campaign_id"), "campaign_name": r.get("campaign_name"),
                 "metrics": mc.metrics_from_insight(r), "creative": fresh[r["ad_id"]] if r["ad_id"] in fresh else mc.creative_info(d),
             })
-        return ads
+        return ads, len(need)
+
+    def fetch_ads(self, rep, on_progress=None):
+        """Both phases at once (the 60-day window uses this)."""
+        return self.attach_creatives(rep, self.fetch_metrics(rep, on_progress), on_progress)[0]
 
     def period_totals(self, rep, since, until):
         stored = blocks.stored_totals(rep.conn, rep.account_id, since, until)       # the whole period is already stored: no Meta call

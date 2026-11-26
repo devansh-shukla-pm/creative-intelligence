@@ -47,6 +47,9 @@ class Report:
         assert letter in "abcd"
         self.conn.execute(f"UPDATE reports SET signal_{letter}=now(), updated_at=now() WHERE id=%s AND status<>'cancelled'", (self.id,))
 
+    def bump_rev(self):
+        self.conn.execute("UPDATE reports SET rev=rev+1, updated_at=now() WHERE id=%s AND status<>'cancelled'", (self.id,))
+
     def finish(self):
         self.conn.execute("UPDATE reports SET status='done', stage=NULL, progress='{}'::jsonb, updated_at=now() WHERE id=%s AND status<>'cancelled'", (self.id,))
 

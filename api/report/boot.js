@@ -9,7 +9,8 @@ export default handler('GET', async (req, res) => {
   const user = await requireUser(req);
   const report = await getReportForUser(u.searchParams.get('id'), user.id);
   const have = (u.searchParams.get('have') || '').split(',').filter(Boolean);
-  const body = await bootPayload(report, user.name, have);
+  const rev = Number(u.searchParams.get('rev') || 0) || 0;       // creative details refreshed after the client's copy: send the payloads again
+  const body = await bootPayload(report, user.name, have, rev);
   if (u.searchParams.get('format') === 'json') return sendJson(res, 200, body);
   sendText(res, 200, `window.__BOOT = ${JSON.stringify(body).replace(/</g, '\\u003c')};`, 'application/javascript; charset=utf-8');
 });

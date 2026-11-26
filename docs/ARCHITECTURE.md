@@ -89,5 +89,5 @@ Meta rate limits belong to the app (all users together) and to each ad account, 
 ## What is never repeated
 `ad_cache` is keyed by ad account and ad id, shared by all users. Per ad it stores the creative details, the extraction, angle labels and product; `extraction_status` ok, fallback, skipped or failed is final. `cache.share_results` copies finished work between ads with the same `creative_id`, and `_classify` sends only one ad per creative to the models. Clustering re-sends an ad only when it has never been clustered, or at most twice if the model skipped a field. Only Meta spend and ROAS (cheap, range-specific) are fetched for every new range.
 
-## Per-day Meta store
-`daily.py`: `missing_days` (SQL over `insight_days`), `chunks` (14-day windows), `pull_missing` (Meta `time_increment=1`), `save_chunk`, `aggregate` (sum per ad, shaped like a Meta insight row so `metrics_from_insight` is unchanged), `totals` (previous-period trend from stored days when possible). Replaces the exact-range `insights_cache`.
+## Meta numbers: blocks
+`blocks.py`: `plan` (stored blocks fully inside the range, best disjoint set by days covered, gaps, fallback to one plain pull when fragmented, recent days split into their own block), `ensure` (pull each gap with `mc.pull_insights`, store a block), `aggregate` (sum blocks per ad, shaped like a Meta insight row so `metrics_from_insight` is unchanged), `stored_totals` (trend arrows without a Meta call). `MetaSource.fetch_metrics` then `attach_creatives`: numbers first, creative details second.

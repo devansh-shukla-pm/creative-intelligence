@@ -170,3 +170,15 @@ test('a finished report is copied for another user instantly, with no worker', a
   const other = await (await post('/api/report/create', { account_id: '1000000000001', date_from: '2025-03-01', date_to: '2025-03-30' }, ck)).json();
   assert.notEqual(other.copied, true);
 });
+
+test('creative details landing later refresh the payloads the page already has (rev)', async () => {
+  await q(`UPDATE reports SET status='done'`);
+  const { id } = await (await c('/api/report/create', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ account_id: '1000000000001', date_from: '2024-07-01', date_to: '2024-07-31', force: true }) })).json();
+  await q(`UPDATE reports SET signal_a=now(), rev=1 WHERE id=$1`, [id]);
+  await q(`INSERT INTO report_payloads (report_id, kind, body) VALUES ($1,'audit','[]'),($1,'cmt_ads','[]'),($1,'data','{"meta":{"creative_ready":true},"ads":[]}')`, [id]);
+  const boot = rev => c(`/api/report/boot?id=${id}&format=json&have=a&rev=${rev}`).then(r => r.json());
+  const old = await boot(0);                       // the page applied rev 0 (metrics only): it gets the refreshed payloads
+  assert.ok(old.data && old.data.meta.creative_ready === true); assert.equal(old.report.rev, 1);
+  const cur = await boot(1);                       // already current: nothing is resent
+  assert.equal(cur.data, null);
+});

@@ -112,6 +112,7 @@ def build_data(ads, classified, prev=None):
     n_camp = sum(1 for x in out_ads if x["campaign"])
     return {
         "meta": {"source": "Meta Marketing API", "total_ads": len(out_ads),
+                 "creative_ready": not any(a["media_type"] == "PENDING" for a in out_ads),
                  "sku_coverage_note": f"{n_single} of {len(out_ads)} ads mapped to a single clean SKU; {n_multi} flagged multi-SKU/bundle; {len(out_ads) - n_single - n_multi} unclassified.",
                  "campaign_coverage_note": f"{n_camp} of {len(out_ads)} ads carry a campaign.",
                  "partnership_proxy_note": 'No Partnership Ad field is pulled. "Partnership / Non-Partnership" is approximated from creator_presence (a person on camera vs none).',

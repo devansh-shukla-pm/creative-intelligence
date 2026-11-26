@@ -2108,7 +2108,7 @@ const state = {
   stageFocus:'problem-statement',
   sidebarCollapsed:false,
   dataReady:false, // flips true once the (simulated) AI-report pipeline fully finishes; gates the SKU pill + the two Creative Stage Overview charts
-  winFrom:null, winTo:null,
+  winFrom:null, winTo:null, rev:0,
   sigA:false, sigB:false, sigC:false, sigD:false, // backend signals (PRD 1 section 4.3): A Meta data, B classification, C insights, D Lab
   reportStatus:null, reportError:null, progressMsg:'',
   broadLoading:true, // true only for the first 3s of a load cycle; blankets everything below the config bar in a generic skeleton
@@ -2950,7 +2950,9 @@ function scopeLabel(){
   return esc(skuName(state.sku));
 }
 
+function creativeReady(){ return !(LIVE && DATA && DATA.meta && DATA.meta.creative_ready===false); }
 function renderFormatCard(){
+  if(!creativeReady()) return `<div class="panel"><div class="panel-head"><div><h3>Format Split</h3><p>Reading each ad's format&hellip;</p></div></div><div class="panel-body"><div class="skel" style="height:260px;border-radius:var(--radius-lg)"></div></div></div>`;
   const ads = scopedAds({skipCreativeType:true});
   const modeOptions = [
     {value:'format', label:'Format split'},
@@ -6295,7 +6297,7 @@ function createReportFromHeader(btn){ btn.disabled = true; btn.textContent = 'St
 
 /* Put the pieces the backend sent into the same variables the app has always read, then report whether signals changed. */
 function applyBoot(b){
-  const before = [state.sigA,state.sigB,state.sigC,state.sigD].join();
+  const before = [state.sigA,state.sigB,state.sigC,state.sigD,state.rev||0].join();
   if(b.data){ DATA = b.data; STAGE_DEFS = DATA.stage_defs; SKUS = DATA.skus; }
   if(b.cmtAds){ CMT_ADS = b.cmtAds; CMT_TOTAL_ADS = CMT_ADS.length; }
   if(b.cmtDims) CMT_DIMENSIONS = b.cmtDims;
@@ -6306,15 +6308,16 @@ function applyBoot(b){
   state.sigA = g.a; state.sigB = g.b; state.sigC = g.c; state.sigD = g.d;
   state.broadLoading = !g.a; state.dataReady = g.b;
   if(g.a && !state.loadPhaseStart) state.loadPhaseStart = Date.now();
+  state.rev = (b.report && b.report.rev) || 0;
   state.reportStatus = b.report.status; state.reportError = b.error || null;
   state.progressMsg = (b.progress && b.progress.message) || '';
   state.winFrom = b.report.window_from || null; state.winTo = b.report.window_to || null;
-  return before !== [state.sigA,state.sigB,state.sigC,state.sigD].join();
+  return before !== [state.sigA,state.sigB,state.sigC,state.sigD,state.rev||0].join();
 }
 async function pollOnce(){
   const have = [['a',state.sigA],['b',state.sigB],['c',state.sigC],['d',state.sigD]].filter(x=>x[1]).map(x=>x[0]).join(',');
   let r;
-  try{ r = await fetch(`/api/report/boot?id=${REPORT_ID}&format=json&have=${have}`,{credentials:'same-origin',cache:'no-store'}); }
+  try{ r = await fetch(`/api/report/boot?id=${REPORT_ID}&format=json&have=${have}&rev=${state.rev||0}`,{credentials:'same-origin',cache:'no-store'}); }
   catch(e){ return true; }                                   // network blip: keep polling
   if(r.status===401 || r.status===404){ location.href='/'; return false; }
   if(!r.ok) return true;

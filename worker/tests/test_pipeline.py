@@ -49,3 +49,30 @@ def test_failure_is_reported_not_raised(conn, env, monkeypatch):
     assert runner.run(rid) == 0          # a reported failure is not a failed job (no GitHub alert)
     r = conn.execute("SELECT status, error FROM reports WHERE id=%s", (rid,)).fetchone()
     assert r["status"] == "failed" and "No ads" in r["error"]
+
+
+def test_numbers_open_the_page_before_creative_details_are_fetched(conn, env):
+    from worker import run as runner, mock
+    from worker.report import Report
+    full = mock.MockSource().fetch_ads(None)
+    seen = {}
+    class Src:
+        def fetch_metrics(self, rep, on_progress=None): return [{"ad_id": a["ad_id"]} for a in full]
+        def provisional_ads(self, rep, rows):
+            return [{**a, "creative": {"media_type": "PENDING"}} for a in full]
+        def attach_creatives(self, rep, rows, on_progress=None):
+            r = conn.execute("SELECT signal_a, rev FROM reports WHERE id=%s", (rep.id,)).fetchone()
+            d = conn.execute("SELECT body FROM report_payloads WHERE report_id=%s AND kind='data'", (rep.id,)).fetchone()
+            seen.update(signal_a=bool(r["signal_a"]), rev=r["rev"], ready=d["body"]["meta"]["creative_ready"])
+            return full, len(full)
+        def period_totals(self, rep, since, until): return None
+        def thumbnail(self, ad): return None
+    rid = make_report(conn, account="1000000000003")
+    rep = Report.load(conn, rid)
+    runner.stage_a(rep, Src())
+    assert seen == {"signal_a": True, "rev": 0, "ready": False}           # numbers were already on the page, flagged as still loading
+    after = conn.execute("SELECT rev FROM reports WHERE id=%s", (rid,)).fetchone()["rev"]
+    d = conn.execute("SELECT body FROM report_payloads WHERE report_id=%s AND kind='data'", (rid,)).fetchone()["body"]
+    assert after == 1 and d["meta"]["creative_ready"] is True            # then refreshed, and the page is told
+    for job in runner._BG: job.result()
+    runner._BG.clear()
