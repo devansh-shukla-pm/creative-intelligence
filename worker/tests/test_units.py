@@ -220,7 +220,7 @@ def test_empty_meta_answer_is_explained(conn, env, monkeypatch):
     from worker.sources import MetaSource
     from worker.report import Report, ReportError
     from worker.tests.conftest import make_report
-    monkeypatch.setattr(mc, "pull_insights_daily", lambda *a, **k: [])
+    monkeypatch.setattr(mc, "pull_insights", lambda *a, **k: [])
     monkeypatch.setattr(mc, "account_spend", lambda *a, **k: 0.0)
     monkeypatch.setattr(mc, "diagnose_empty", lambda *a, **k: {"account_status": 1, "range_spend": 0.0, "lifetime_spent": 5000.0, "has_ads": True})
     rid = make_report(conn, account="1000000000009", dates=("2026-01-01", "2026-01-10"))

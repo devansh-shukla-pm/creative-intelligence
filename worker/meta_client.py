@@ -178,23 +178,19 @@ def metrics_from_insight(row: dict) -> dict:
         "conversion_percentage": pct(purchases),
     }
 
-def pull_insights(token, account_id, since, until, on_page=None, daily=False):
-    """Ad-level insights with spend. daily=True returns one row per ad per day (date_start), the unit the app stores."""
+def pull_insights(token, account_id, since, until, on_page=None):
+    """Ad-level insights with spend for one date range: one row per ad, about one call per 500 ads."""
     params = {
         "level": "ad", "fields": INSIGHT_FIELDS, "limit": 500,
         "time_range": json.dumps({"since": since, "until": until}),
         "filtering": json.dumps([{"field": "spend", "operator": "GREATER_THAN", "value": "0"}]),
     }
-    if daily: params["time_increment"] = 1
     try:
         return _paged(f"/act_{account_id}/insights", params, token, on_page)
     except MetaError as e:
         if "reduce the amount of data" in str(e).lower() or e.code == 1:
             return _async_insights(token, account_id, params)
         raise
-
-def pull_insights_daily(token, account_id, since, until, on_page=None):
-    return pull_insights(token, account_id, since, until, on_page, daily=True)
 
 def account_spend(token, account_id, since, until):
     """Account-level spend for a period: one call, used to tell a genuinely idle period from an empty answer."""

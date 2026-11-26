@@ -1,6 +1,6 @@
 """Where ads come from. The pipeline only talks to this interface, so real Meta and the mock are interchangeable."""
 from __future__ import annotations
-from . import cache, config, crypto, daily, db, meta_client as mc
+from . import blocks, cache, config, crypto, db, meta_client as mc
 from .report import ReportError
 
 class MetaSource:
@@ -22,13 +22,13 @@ class MetaSource:
         Numbers come from the per-day store: only days not stored yet (or still provisional) are asked from Meta."""
         try:
             conn = rep.conn
-            missing = daily.missing_days(conn, rep.account_id, rep.date_from, rep.date_to)
-            if missing:
+            if blocks.needs_pull(conn, rep.account_id, rep.date_from, rep.date_to):
                 with db.MetaGate(rep):
-                    daily.pull_missing(conn, self.token, rep.account_id, missing, on_progress)
-            elif on_progress:
-                on_progress("Loaded your ad numbers (already pulled)")
-            rows = daily.aggregate(conn, rep.account_id, rep.date_from, rep.date_to)
+                    block_ids, _ = blocks.ensure(conn, self.token, rep.account_id, rep.date_from, rep.date_to, on_progress)
+            else:
+                block_ids = blocks.plan(conn, rep.account_id, rep.date_from, rep.date_to)[0]
+                if on_progress: on_progress("Loaded your ad numbers (already pulled)")
+            rows = blocks.aggregate(conn, rep.account_id, block_ids)
             if not rows:
                 with db.MetaGate(rep):
                     d = mc.diagnose_empty(self.token, rep.account_id, rep.date_from, rep.date_to)
@@ -57,7 +57,7 @@ class MetaSource:
         return ads
 
     def period_totals(self, rep, since, until):
-        stored = daily.totals(rep.conn, rep.account_id, since, until)       # the whole period is already stored: no Meta call
+        stored = blocks.stored_totals(rep.conn, rep.account_id, since, until)       # the whole period is already stored: no Meta call
         if stored: return stored
         try:
             with db.MetaGate(rep):

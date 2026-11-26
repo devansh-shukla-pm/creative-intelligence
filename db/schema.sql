@@ -111,11 +111,23 @@ CREATE TABLE IF NOT EXISTS insights_cache (
 -- How many times an ad has been sent to the clustering prompt, so an ad the model keeps skipping a field for is not re-sent forever.
 ALTER TABLE ad_cache ADD COLUMN IF NOT EXISTS cluster_attempts int NOT NULL DEFAULT 0;
 
--- Meta results stored per ad per day, so any date range is a sum of stored days and only days we do not have are pulled.
-CREATE TABLE IF NOT EXISTS ad_daily (
+-- Meta results stored as aggregate blocks: one block is the per-ad totals for one exact date range, pulled with a single ad-level
+-- insights request (about one call per 500 ads). A new report reuses every stored block that lies fully inside its range and pulls
+-- only the uncovered gaps, so overlapping reports pay for their new days only and never for more calls than one plain pull.
+DROP TABLE IF EXISTS ad_daily;
+DROP TABLE IF EXISTS insight_days;
+CREATE TABLE IF NOT EXISTS insight_blocks (
+  id          bigserial PRIMARY KEY,
   account_id  text NOT NULL,
+  date_from   date NOT NULL,
+  date_to     date NOT NULL,
+  pulled_at   timestamptz NOT NULL DEFAULT now(),
+  ads         int NOT NULL DEFAULT 0,
+  UNIQUE (account_id, date_from, date_to)
+);
+CREATE TABLE IF NOT EXISTS block_ads (
+  block_id    bigint NOT NULL REFERENCES insight_blocks(id) ON DELETE CASCADE,
   ad_id       text NOT NULL,
-  day         date NOT NULL,
   spend       double precision NOT NULL,
   impressions double precision NOT NULL DEFAULT 0,
   clicks      double precision NOT NULL DEFAULT 0,
@@ -125,11 +137,10 @@ CREATE TABLE IF NOT EXISTS ad_daily (
   atc         double precision NOT NULL DEFAULT 0,
   lpv         double precision NOT NULL DEFAULT 0,
   frequency   double precision NOT NULL DEFAULT 0,
-  PRIMARY KEY (account_id, ad_id, day)
+  PRIMARY KEY (block_id, ad_id)
 );
-CREATE INDEX IF NOT EXISTS ad_daily_day_idx ON ad_daily (account_id, day);
 
--- Names that go with an ad id (the daily rows stay small).
+-- Names that go with an ad id.
 CREATE TABLE IF NOT EXISTS ad_names (
   account_id    text NOT NULL,
   ad_id         text NOT NULL,
@@ -138,12 +149,4 @@ CREATE TABLE IF NOT EXISTS ad_names (
   campaign_name text,
   updated_at    timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (account_id, ad_id)
-);
-
--- Days already pulled for an account (a day with no spend is pulled too). pulled_at says whether the day was final when pulled.
-CREATE TABLE IF NOT EXISTS insight_days (
-  account_id text NOT NULL,
-  day        date NOT NULL,
-  pulled_at  timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (account_id, day)
 );
