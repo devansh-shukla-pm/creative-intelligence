@@ -53,6 +53,9 @@ class Conn:
         try: self._c.close()
         except Exception: pass
 
+    def __enter__(self): return self
+    def __exit__(self, *exc): self.close(); return False
+
     def __getattr__(self, name):
         return getattr(self._c, name)
 
