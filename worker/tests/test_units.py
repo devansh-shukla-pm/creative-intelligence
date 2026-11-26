@@ -239,3 +239,16 @@ def test_explain_empty_cases():
     assert "no ads yet" in explain_empty({"account_status": 1, "range_spend": 0, "has_ads": False}, f, t)
     assert "never spent" in explain_empty({"account_status": 1, "range_spend": 0, "lifetime_spent": 0.0, "has_ads": True}, f, t)
     assert "temporary" not in explain_empty({"account_status": 1, "range_spend": 0, "has_ads": True}, f, t)
+
+
+def test_connection_survives_the_database_hanging_up(conn, env):
+    """Neon closes idle connections on long runs; the worker must reconnect and carry on instead of crashing."""
+    import psycopg
+    from worker import db
+    pid = conn.execute("SELECT pg_backend_pid() AS p").fetchone()["p"]
+    killer = psycopg.connect(env["DATABASE_URL"] if isinstance(env, dict) and "DATABASE_URL" in env else __import__("worker.config", fromlist=["x"]).DATABASE_URL, autocommit=True)
+    killer.execute("SELECT pg_terminate_backend(%s)", (pid,)); killer.close()
+    assert conn.execute("SELECT 1 AS ok").fetchone()["ok"] == 1                 # reconnected transparently
+    assert conn.execute("SELECT pg_backend_pid() AS p").fetchone()["p"] != pid
+    with conn.cursor() as cur:                                                   # batch writes work after reconnect too
+        cur.execute("SELECT 2 AS two"); assert cur.fetchone()["two"] == 2
