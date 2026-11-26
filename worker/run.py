@@ -77,19 +77,28 @@ def _classify(rep, source, llm, ads, prev=None):
     ids = [a["ad_id"] for a in ads]
     cached = cache.load_cache(conn, rep.account_id, ids)
 
-    rep.progress("extracting", "Reading your ads", 0, len(ads))
-    extract.run_extraction(conn, rep, llm, source, ads, cached,
-                           lambda m, d=None, t=None: rep.progress("extracting", m, d, t))
+    # Ads that run the same creative (copies in other ad sets) are worked out once: the models see one ad per creative, and the
+    # rest copy the result. Ads read in an earlier report, by anyone, are never sent again.
+    cache.share_results(conn, rep.account_id, ids)
     cached = cache.load_cache(conn, rep.account_id, ids)
-    extracted = [{"ad_id": i, "extraction": cached[i]["extraction"]} for i in ids
-                 if cached.get(i) and cached[i].get("extraction")]
+    uniq = cache.unique_by_creative(ads)
+
+    rep.progress("extracting", "Reading your ads", 0, len(uniq))
+    extract.run_extraction(conn, rep, llm, source, uniq, cached,
+                           lambda m, d=None, t=None: rep.progress("extracting", m, d, t))
+    cache.share_results(conn, rep.account_id, ids)
+    cached = cache.load_cache(conn, rep.account_id, ids)
+    extracted = [{"ad_id": a["ad_id"], "extraction": cached[a["ad_id"]]["extraction"]} for a in uniq
+                 if cached.get(a["ad_id"]) and cached[a["ad_id"]].get("extraction")]
 
     rep.progress("clustering", "Grouping similar messages", 0, len(extracted))
     cluster.run_clustering(conn, rep, llm, extracted, cached, lambda m, d=None, t=None: rep.progress("clustering", m, d, t))
+    cache.share_results(conn, rep.account_id, ids)
     cached = cache.load_cache(conn, rep.account_id, ids)
 
     rep.progress("naming", "Naming your products", 0, len(extracted))
     naming.run_naming(conn, rep, llm, extracted, cached, lambda m, d=None, t=None: rep.progress("naming", m, d, t))
+    cache.share_results(conn, rep.account_id, ids)
     cached = cache.load_cache(conn, rep.account_id, ids)
 
     rep.progress("assembling", "Putting your report together")

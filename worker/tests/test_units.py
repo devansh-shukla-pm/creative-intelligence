@@ -252,3 +252,32 @@ def test_connection_survives_the_database_hanging_up(conn, env):
     assert conn.execute("SELECT pg_backend_pid() AS p").fetchone()["p"] != pid
     with conn.cursor() as cur:                                                   # batch writes work after reconnect too
         cur.execute("SELECT 2 AS two"); assert cur.fetchone()["two"] == 2
+
+
+def test_ads_with_the_same_creative_share_results(conn):
+    from worker import cache
+    acct = "acct-share"
+    cache.save_creatives_batch(conn, acct, [("a1", {"creative_id": "C1", "media_type": "VIDEO"}), ("a2", {"creative_id": "C1", "media_type": "VIDEO"}),
+                                            ("a3", {"creative_id": "C2", "media_type": "IMAGE"}), ("a4", {"media_type": "IMAGE"})])
+    cache.save_extraction(conn, acct, "a1", {"hook_line_text": "Grey hair gone"}, "ok", 1)
+    cache.save_cluster_labels(conn, acct, "a1", {"hook_line_text": "Hair problem hook"})
+    cache.save_product(conn, acct, "a1", {"products": ["Root Touch Up"], "category": "Hair", "is_multi": False})
+    cache.share_results(conn, acct, ["a1", "a2", "a3", "a4"])
+    rows = cache.load_cache(conn, acct, ["a1", "a2", "a3", "a4"])
+    assert rows["a2"]["extraction"] == {"hook_line_text": "Grey hair gone"} and rows["a2"]["extraction_status"] == "ok"
+    assert rows["a2"]["cluster_labels"] == {"hook_line_text": "Hair problem hook"} and rows["a2"]["product"]["products"] == ["Root Touch Up"]
+    assert rows["a3"]["extraction"] is None and rows["a4"]["extraction"] is None          # other creatives are untouched
+    uniq = cache.unique_by_creative([{"ad_id": i, "creative": {"creative_id": c}} for i, c in [("a1", "C1"), ("a2", "C1"), ("a3", "C2"), ("a4", None)]])
+    assert [a["ad_id"] for a in uniq] == ["a1", "a3", "a4"]                                # one per creative; no id means its own
+
+
+def test_nothing_already_done_is_sent_to_the_models_again():
+    from worker.extract import needs_extraction
+    from worker.cluster import run_clustering
+    for st in ("ok", "fallback", "skipped", "failed"):
+        assert needs_extraction({"extraction_status": st, "extraction_attempts": 1}) is False      # a thumbnail-only read is final too
+    assert needs_extraction(None) is True and needs_extraction({"extraction_status": None, "extraction_attempts": 1}) is True
+    ad = {"ad_id": "x", "extraction": {"hook_line_text": "h", "cta_text": "Buy now"}}
+    cached = {"x": {"cluster_labels": {"hook_line_text": "H"}, "cluster_attempts": 2}}              # model skipped cta_text twice already
+    msgs = []
+    assert run_clustering(None, type("R", (), {"account_id": "a"})(), None, [ad], cached, lambda *a, **k: msgs.append(a))["new"] == 0

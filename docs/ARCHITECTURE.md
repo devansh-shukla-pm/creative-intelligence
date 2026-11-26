@@ -85,3 +85,6 @@ Meta rate limits belong to the app (all users together) and to each ad account, 
 
 ## Reuse across users
 `createReport` order: (1) same user, same account and range within 6 h: open that report; (2) any other user's finished report for the same account and exact range within 6 h: `copyReport` clones it (no worker); (3) otherwise create a report and dispatch the worker. The worker then reuses ad-level caches (`ad_cache`, `thumbs`, `account_memory`, `insights_cache`) that are keyed by ad account, so even a new range for a known account only pays for new ads.
+
+## What is never repeated
+`ad_cache` is keyed by ad account and ad id, shared by all users. Per ad it stores the creative details, the extraction, angle labels and product; `extraction_status` ok, fallback, skipped or failed is final. `cache.share_results` copies finished work between ads with the same `creative_id`, and `_classify` sends only one ad per creative to the models. Clustering re-sends an ad only when it has never been clustered, or at most twice if the model skipped a field. Only Meta spend and ROAS (cheap, range-specific) are fetched for every new range.

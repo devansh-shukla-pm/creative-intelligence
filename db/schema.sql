@@ -107,3 +107,6 @@ CREATE TABLE IF NOT EXISTS insights_cache (
   fetched_at  timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (account_id, date_from, date_to)
 );
+
+-- How many times an ad has been sent to the clustering prompt, so an ad the model keeps skipping a field for is not re-sent forever.
+ALTER TABLE ad_cache ADD COLUMN IF NOT EXISTS cluster_attempts int NOT NULL DEFAULT 0;

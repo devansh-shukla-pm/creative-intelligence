@@ -56,8 +56,6 @@ def extract_one(llm, ad, video_url=None, frames=None):
 
 def needs_extraction(row):
     if row is None: return True
-    if row.get("extraction_status") == "fallback" and (row.get("extraction_attempts") or 0) < 2:
-        return True                              # read from one thumbnail only: give it one more go with video / frames
     if row.get("extraction_status") in DONE: return False
     return True
 

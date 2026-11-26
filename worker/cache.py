@@ -38,7 +38,7 @@ def bump_attempt(conn, account_id, ad_id, attempts, status=None):
                  (attempts, status, account_id, ad_id))
 
 def save_cluster_labels(conn, account_id, ad_id, labels):
-    conn.execute("UPDATE ad_cache SET cluster_labels=%s, updated_at=now() WHERE account_id=%s AND ad_id=%s",
+    conn.execute("UPDATE ad_cache SET cluster_labels=%s, cluster_attempts=cluster_attempts+1, updated_at=now() WHERE account_id=%s AND ad_id=%s",
                  (db.J(labels), account_id, ad_id))
 
 def save_product(conn, account_id, ad_id, product):
@@ -109,3 +109,39 @@ def put_insights(conn, account_id, date_from, date_to, rows):
     conn.execute("""INSERT INTO insights_cache (account_id, date_from, date_to, rows) VALUES (%s,%s,%s,%s)
                     ON CONFLICT (account_id, date_from, date_to) DO UPDATE SET rows=EXCLUDED.rows, fetched_at=now()""",
                  (account_id, date_from, date_to, db.J(rows)))
+
+
+def creative_key(ad):
+    """Ads that run the same Meta creative (copies in other ad sets) read, say and look the same: one key for all of them."""
+    return (ad.get("creative") or {}).get("creative_id") or ("ad", ad["ad_id"])
+
+def unique_by_creative(ads):
+    """First ad of each creative. Only these go to the models; the rest get the same result by copying (share_results)."""
+    seen, out = set(), []
+    for a in ads:
+        k = creative_key(a)
+        if k in seen: continue
+        seen.add(k); out.append(a)
+    return out
+
+def share_results(conn, account_id, ad_ids):
+    """Copy what has already been worked out (the model's reading, angle labels, product) onto ads that run the same creative but
+    have not got it yet. The best finished sibling is used. No model call, one statement."""
+    conn.execute("""
+        UPDATE ad_cache t SET
+          extraction = COALESCE(t.extraction, s.extraction),
+          extraction_status = CASE WHEN t.extraction IS NULL THEN s.extraction_status ELSE t.extraction_status END,
+          extraction_attempts = CASE WHEN t.extraction IS NULL THEN GREATEST(t.extraction_attempts, 1) ELSE t.extraction_attempts END,
+          cluster_labels = COALESCE(t.cluster_labels, s.cluster_labels),
+          product = COALESCE(t.product, s.product),
+          updated_at = now()
+        FROM (SELECT DISTINCT ON (creative->>'creative_id')
+                     creative->>'creative_id' AS cid, extraction, extraction_status, cluster_labels, product
+                FROM ad_cache
+               WHERE account_id = %s AND extraction IS NOT NULL AND extraction_status IN ('ok', 'fallback')
+                 AND creative->>'creative_id' IS NOT NULL
+               ORDER BY creative->>'creative_id', (extraction_status = 'ok') DESC, (cluster_labels IS NOT NULL) DESC,
+                        (product IS NOT NULL) DESC, updated_at DESC) s
+        WHERE t.account_id = %s AND t.ad_id = ANY(%s) AND t.creative->>'creative_id' = s.cid
+          AND (t.extraction IS NULL OR t.cluster_labels IS NULL OR t.product IS NULL)
+    """, (account_id, account_id, list(ad_ids)))

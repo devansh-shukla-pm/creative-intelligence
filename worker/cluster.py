@@ -179,8 +179,10 @@ def cluster_batch(llm, batch, memory):
 def run_clustering(conn, rep, llm, extracted_ads, cached, progress):
     """extracted_ads: [{ad_id, extraction}] for ads that have an extraction. Only those without cached labels are sent."""
     def _missing(a):
-        lab = (cached.get(a["ad_id"]) or {}).get("cluster_labels")
+        row = cached.get(a["ad_id"]) or {}
+        lab = row.get("cluster_labels")
         if lab is None: return list(FREE_TEXT_FIELDS)
+        if (row.get("cluster_attempts") or 0) >= 2: return []            # already sent twice: never again, whatever the model skipped
         return [f for f in FREE_TEXT_FIELDS if ad_free_text(a["ad_id"], a["extraction"]).get(f) and f not in lab]
     need = {a["ad_id"]: _missing(a) for a in extracted_ads}
     new = [a for a in extracted_ads if need[a["ad_id"]]]
